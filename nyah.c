@@ -28,7 +28,7 @@ SDL_Surface* cat_img[5];
 SDL_Surface* sparkle_img[5];
 sparkle_instance* sparkles_list = NULL;
 cat_instance* cat_list = NULL;
-Uint8 bgcolor;
+Uint32 bgcolor;
 
 void add_sparkle(void);
 void add_cat(unsigned int x, unsigned int y);
@@ -37,6 +37,7 @@ void draw_sparkles(unsigned int layer);
 void fillsquare(SDL_Surface* surf, int x, int y, int w, int h, Uint32 col);
 void handleinput(void);
 void load_images(void);
+SDL_Surface* load_image(const char* path);
 void putpix(SDL_Surface* surf, int x, int y, Uint32 col);
 void remove_sparkle(sparkle_instance* s);
 void update_sparkles(void);
@@ -161,17 +162,42 @@ handleinput(void) {
 
 void
 load_images(void) {
-    cat_img[0] = IMG_Load("res/frame00.png");
-    cat_img[1] = IMG_Load("res/frame01.png");
-    cat_img[2] = IMG_Load("res/frame02.png");
-    cat_img[3] = IMG_Load("res/frame03.png");
-    cat_img[4] = IMG_Load("res/frame04.png");
+    cat_img[0] = load_image("res/frame00.png");
+    cat_img[1] = load_image("res/frame01.png");
+    cat_img[2] = load_image("res/frame02.png");
+    cat_img[3] = load_image("res/frame03.png");
+    cat_img[4] = load_image("res/frame04.png");
 
-    sparkle_img[0] = IMG_Load("res/sparkle0.png");
-    sparkle_img[1] = IMG_Load("res/sparkle1.png");
-    sparkle_img[2] = IMG_Load("res/sparkle2.png");
-    sparkle_img[3] = IMG_Load("res/sparkle3.png");
-    sparkle_img[4] = IMG_Load("res/sparkle4.png");
+    sparkle_img[0] = load_image("res/sparkle0.png");
+    sparkle_img[1] = load_image("res/sparkle1.png");
+    sparkle_img[2] = load_image("res/sparkle2.png");
+    sparkle_img[3] = load_image("res/sparkle3.png");
+    sparkle_img[4] = load_image("res/sparkle4.png");
+}
+
+SDL_Surface*
+load_image( const char* path ) {
+    //Temporary storage for the image that's loaded
+    SDL_Surface* loadedImage = NULL;
+
+    //The optimized image that will be used
+    SDL_Surface* optimizedImage = NULL;
+
+    //Load the image
+    loadedImage = IMG_Load( path );
+
+    //If nothing went wrong in loading the image
+    if(loadedImage)
+    {
+        //Create an optimized image
+        optimizedImage = SDL_DisplayFormatAlpha( loadedImage );
+
+        //Free the old image
+        SDL_FreeSurface( loadedImage );
+    }
+
+    //Return the optimized image
+    return optimizedImage;
 }
 
 void
@@ -234,9 +260,9 @@ int main( int argc, char *argv[] )
     SDL_Init( SDL_INIT_EVERYTHING );
     screen = SDL_SetVideoMode( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, SURF_TYPE);
 
-    bgcolor = SDL_MapRGB(screen->format, 0, 51, 102);
-
     load_images();
+    
+    bgcolor = SDL_MapRGB(screen->format, 0x00, 0x33, 0x66);
 
     add_cat((SCREEN_WIDTH - cat_img[0]->w) / 2 , (SCREEN_HEIGHT - cat_img[0]->h) / 2);
 
