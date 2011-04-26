@@ -1,12 +1,12 @@
-nyahcat:  nyah.c
-	gcc -g nyah.c -o nyahcat -lSDL -lSDL_image -Wall
-	chmod +x nyahcat
+nyancat:  nyan.c
+	gcc -g nyan.c -o nyancat -lSDL -lSDL_image -Wall
+	chmod +x nyancat
 
 install:
-	cp nyah /usr/bin
+	cp nyan /usr/bin
 
 clean:
-	rm nyahcat
+	rm nyancat
 
 uninstall:
-	rm /usr/bin/nyahcat
+	rm /usr/bin/nyancat
