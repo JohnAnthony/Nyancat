@@ -1,5 +1,7 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
+#include <SDL/SDL_mixer.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
@@ -26,6 +28,7 @@ struct sparkle_instance {
 
 SDL_Surface* cat_img[5];
 SDL_Surface* sparkle_img[5];
+Mix_Music* music;
 sparkle_instance* sparkles_list = NULL;
 cat_instance* cat_list = NULL;
 Uint32 bgcolor;
@@ -38,8 +41,10 @@ void fillsquare(SDL_Surface* surf, int x, int y, int w, int h, Uint32 col);
 void handleinput(void);
 void load_images(void);
 SDL_Surface* load_image(const char* path);
+void load_music(void);
 void putpix(SDL_Surface* surf, int x, int y, Uint32 col);
 void remove_sparkle(sparkle_instance* s);
+void start_music(void);
 void update_sparkles(void);
 
 unsigned int            SCREEN_WIDTH = 1920;
@@ -201,6 +206,13 @@ load_image( const char* path ) {
 }
 
 void
+load_music(void) {
+    music = Mix_LoadMUS("res/nyan.ogg");
+    if(!music)
+    	printf("Unable to load Ogg file: %s\n", Mix_GetError());
+}
+
+void
 putpix(SDL_Surface* surf, int x, int y, Uint32 col) {
     Uint32 *pix = (Uint32 *) surf->pixels;
     pix [ ( y * surf->w ) + x ] = col;
@@ -221,6 +233,12 @@ remove_sparkle(sparkle_instance* s) {
 
     s2->next = s2->next->next;
     free(s);
+}
+
+void
+start_music(void) {
+    if(Mix_PlayMusic(music, 0) == -1)
+	    printf("Unable to play Ogg file: %s\n", Mix_GetError());
 }
 
 void
@@ -264,6 +282,7 @@ int main( int argc, char *argv[] )
     screen = SDL_SetVideoMode( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, SURF_TYPE);
 
     load_images();
+    load_music();
     
     bgcolor = SDL_MapRGB(screen->format, 0x00, 0x33, 0x66);
 
@@ -299,6 +318,10 @@ int main( int argc, char *argv[] )
         if (draw_time < (1000 / FRAMERATE))
             SDL_Delay((1000 / FRAMERATE) - draw_time);
     }
+
+    Mix_HaltMusic();
+    Mix_FreeMusic(music);
+    Mix_CloseAudio();
 
     SDL_Quit();
     return 0;
