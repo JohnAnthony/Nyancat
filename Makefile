@@ -3,10 +3,13 @@ nyancat:  nyan.c
 	chmod +x nyancat
 
 install:
-	cp nyan /usr/bin
+	cp nyancat /usr/bin
+	mkdir --parents /usr/share/nyancat
+	cp -v res/* /usr/share/nyancat
 
 clean:
 	rm nyancat
 
 uninstall:
 	rm /usr/bin/nyancat
+	rm -rv /usr/share/nyancat

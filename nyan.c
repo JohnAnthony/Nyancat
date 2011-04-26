@@ -176,16 +176,31 @@ handleinput(void) {
 void
 load_images(void) {
     cat_img[0] = load_image("res/frame00.png");
-    cat_img[1] = load_image("res/frame01.png");
-    cat_img[2] = load_image("res/frame02.png");
-    cat_img[3] = load_image("res/frame03.png");
-    cat_img[4] = load_image("res/frame04.png");
+    if(!cat_img[0]) {
+        cat_img[0] = load_image("/usr/share/nyancat/frame00.png");
+        cat_img[1] = load_image("/usr/share/nyancat/frame01.png");
+        cat_img[2] = load_image("/usr/share/nyancat/frame02.png");
+        cat_img[3] = load_image("/usr/share/nyancat/frame03.png");
+        cat_img[4] = load_image("/usr/share/nyancat/frame04.png");
 
-    sparkle_img[0] = load_image("res/sparkle0.png");
-    sparkle_img[1] = load_image("res/sparkle1.png");
-    sparkle_img[2] = load_image("res/sparkle2.png");
-    sparkle_img[3] = load_image("res/sparkle3.png");
-    sparkle_img[4] = load_image("res/sparkle4.png");
+        sparkle_img[0] = load_image("/usr/share/nyancat/sparkle0.png");
+        sparkle_img[1] = load_image("/usr/share/nyancat/sparkle1.png");
+        sparkle_img[2] = load_image("/usr/share/nyancat/sparkle2.png");
+        sparkle_img[3] = load_image("/usr/share/nyancat/sparkle3.png");
+        sparkle_img[4] = load_image("/usr/share/nyancat/sparkle4.png");
+    }
+    else {
+        cat_img[1] = load_image("res/frame01.png");
+        cat_img[2] = load_image("res/frame02.png");
+        cat_img[3] = load_image("res/frame03.png");
+        cat_img[4] = load_image("res/frame04.png");
+
+        sparkle_img[0] = load_image("res/sparkle0.png");
+        sparkle_img[1] = load_image("res/sparkle1.png");
+        sparkle_img[2] = load_image("res/sparkle2.png");
+        sparkle_img[3] = load_image("res/sparkle3.png");
+        sparkle_img[4] = load_image("res/sparkle4.png");
+    }
 }
 
 SDL_Surface*
@@ -216,8 +231,10 @@ load_image( const char* path ) {
 void
 load_music(void) {
     music = Mix_LoadMUS("res/nyan.ogg");
-    if(!music)
-    	printf("Unable to load Ogg file: %s\n", Mix_GetError());
+    if (!music)
+        music = Mix_LoadMUS("/usr/share/nyancat/nyan.ogg");
+    if (!music)
+        printf("Unable to load Ogg file: %s\n", Mix_GetError());
 }
 
 void
@@ -246,7 +263,7 @@ remove_sparkle(sparkle_instance* s) {
 void
 start_music(void) {
     if(Mix_PlayMusic(music, 0) == -1)
-	    printf("Unable to play Ogg file: %s\n", Mix_GetError());
+        printf("Unable to play Ogg file: %s\n", Mix_GetError());
 }
 
 void
@@ -294,7 +311,7 @@ int main( int argc, char *argv[] )
     load_music();
 
     Mix_PlayMusic(music, 0);
-    
+
     bgcolor = SDL_MapRGB(screen->format, 0x00, 0x33, 0x66);
 
     add_cat((screen->w - cat_img[0]->w) / 2 , (screen->h - cat_img[0]->h) / 2);
