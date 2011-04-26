@@ -44,7 +44,7 @@ void update_sparkles(void);
 
 unsigned int            SCREEN_WIDTH = 1920;
 unsigned int            SCREEN_HEIGHT = 1080;
-unsigned int            FRAMERATE = 12;
+unsigned int            FRAMERATE = 14;
 unsigned int            SCREEN_BPP = 32;
 
 static                  SDL_Surface *screen = NULL;
@@ -112,7 +112,7 @@ draw_cats(unsigned int frame) {
         pos.x = c->loc.x;
         pos.y = c->loc.y;
 
-        if(frame == 0)
+        if(frame < 2)
             pos.y -= 5;
         
         SDL_BlitSurface( cat_img[frame], NULL, screen, &pos );
@@ -227,6 +227,9 @@ void
 update_sparkles(void) {
     sparkle_instance* next, *s = sparkles_list;
 
+    add_sparkle();
+    add_sparkle();
+
     while(s) {
         s->loc.x -= s->speed;
         next = s->next;
@@ -269,13 +272,14 @@ int main( int argc, char *argv[] )
     /* clear initial input */
     while( SDL_PollEvent( &event ) ) {}
 
+    /* Pre-populate with sparkles */
+    for (i = 0; i < 200; i++)
+        update_sparkles();
+
     /* Main loop */
     while( running )
     {
         last_draw = SDL_GetTicks();
-
-        add_sparkle();
-        add_sparkle();
 
         CLEARSCR();
         draw_sparkles(0);
