@@ -26,11 +26,13 @@ struct sparkle_instance {
 
 SDL_Surface* cat_img[5];
 SDL_Surface* sparkle_img[5];
-sparkle_instance* sparkles_front_start = NULL;
+sparkle_instance* sparkles_list = NULL;
+cat_instance* cat_list = NULL;
 Uint8 bgcolor;
 
 void add_sparkle(void);
-void draw_cat(unsigned int frame);
+void add_cat(unsigned int x, unsigned int y);
+void draw_cats(unsigned int frame);
 void draw_sparkles(unsigned int layer);
 void fillsquare(SDL_Surface* surf, int x, int y, int w, int h, Uint32 col);
 void handleinput(void);
@@ -51,7 +53,7 @@ static int              SURF_TYPE = SDL_HWSURFACE;
 
 void
 add_sparkle(void) {
-    sparkle_instance* s = sparkles_front_start;
+    sparkle_instance* s = sparkles_list;
     sparkle_instance* new;
 
     new = malloc(sizeof(sparkle_instance));
@@ -64,8 +66,8 @@ add_sparkle(void) {
     new->layer = rand() % 2;
     new->next = NULL;
 
-    if (!sparkles_front_start) {
-        sparkles_front_start = new;
+    if (!sparkles_list) {
+        sparkles_list = new;
         return;
     }
 
@@ -77,28 +79,57 @@ add_sparkle(void) {
 }
 
 void
-draw_cat(unsigned int frame) {
+add_cat(unsigned int x, unsigned int y) {
+    cat_instance* c = cat_list;
+    cat_instance* new;
+
+    new = malloc(sizeof(cat_instance));
+
+    new->loc.x = x;
+    new->loc.y = y;
+    new->next = NULL;
+
+    if (!cat_list) {
+        cat_list = new;
+        return;
+    }
+
+    /* Find end of list */
+    while (c->next)
+        c = c->next;
+
+    c->next = new;
+}
+
+void
+draw_cats(unsigned int frame) {
+    cat_instance* c = cat_list;;
     SDL_Rect pos;
 
-    pos.x = 40;
-    pos.y = 40;
+    while (c) {
 
-    if(frame == 0)
-        pos.y -= 5;
+        pos.x = c->loc.x;
+        pos.y = c->loc.y;
+
+        if(frame == 0)
+            pos.y -= 5;
         
-    SDL_BlitSurface( cat_img[frame], NULL, screen, &pos );
+        SDL_BlitSurface( cat_img[frame], NULL, screen, &pos );
+
+        c = c->next;
+    }
 }
 
 void
 draw_sparkles(unsigned int layer) {
-    sparkle_instance* s = sparkles_front_start;
+    sparkle_instance* s = sparkles_list;
     SDL_Rect pos;
 
     while (s) {
         if (s->layer == layer) {
             pos.x = s->loc.x;
             pos.y = s->loc.y;
-            SDL_BlitSurface( sparkle_img[sparkles_front_start->frame], NULL, screen, &pos );
+            SDL_BlitSurface( sparkle_img[sparkles_list->frame], NULL, screen, &pos );
         }
         s = s->next;
     }
@@ -151,10 +182,10 @@ putpix(SDL_Surface* surf, int x, int y, Uint32 col) {
 
 void
 remove_sparkle(sparkle_instance* s) {
-    sparkle_instance* s2 = sparkles_front_start;
+    sparkle_instance* s2 = sparkles_list;
 
     if (s2 == s) {
-        sparkles_front_start = s->next;
+        sparkles_list = s->next;
         free(s);
         return;
     }
@@ -168,7 +199,7 @@ remove_sparkle(sparkle_instance* s) {
 
 void
 update_sparkles(void) {
-    sparkle_instance* next, *s = sparkles_front_start;
+    sparkle_instance* next, *s = sparkles_list;
 
     while(s) {
         s->loc.x -= s->speed;
@@ -210,6 +241,8 @@ main( int argc, char *argv[] )
 
     load_images();
 
+    add_cat((SCREEN_WIDTH - cat_img[0]->w) / 2 , (SCREEN_HEIGHT - cat_img[0]->h) / 2);
+
     /* clear initial input */
     while( SDL_PollEvent( &event ) ) {}
 
@@ -223,7 +256,7 @@ main( int argc, char *argv[] )
 
         CLEARSCR();
         draw_sparkles(0);
-        draw_cat(curr_frame);
+        draw_cats(curr_frame);
         draw_sparkles(1);
 
         update_sparkles();

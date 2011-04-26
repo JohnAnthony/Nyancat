@@ -1,0 +1,5 @@
+-- Make screen blanking happen only in the places objects previously were rather than redrawing the whole screen
+-- Add Xinerama support (one cat per monitor)
+-- Add sound
+-- Add command-line args
+-- Add rc file
