@@ -60,7 +60,7 @@ add_sparkle(void) {
 
     new->loc.x = SCREEN_WIDTH + 80;
     new->loc.y = (rand() % (SCREEN_HEIGHT + sparkle_img[0]->h)) - sparkle_img[0]->h;
-    new->frame = rand() % 4;
+    new->frame = rand() % 5;
     new->frame_mov = 1;
     new->speed = 80 + (rand() % 120);
     new->layer = rand() % 2;
@@ -129,7 +129,7 @@ draw_sparkles(unsigned int layer) {
         if (s->layer == layer) {
             pos.x = s->loc.x;
             pos.y = s->loc.y;
-            SDL_BlitSurface( sparkle_img[sparkles_list->frame], NULL, screen, &pos );
+            SDL_BlitSurface( sparkle_img[s->frame], NULL, screen, &pos );
         }
         s = s->next;
     }
@@ -205,22 +205,19 @@ update_sparkles(void) {
         s->loc.x -= s->speed;
         next = s->next;
 
-        if (s->loc.x < 0 - sparkle_img[0]->w) {
-            remove_sparkle(s);
-        }
-        else {
-            s->frame += s->frame_mov;
+        s->frame += s->frame_mov;
 
-            if(s->frame > 3 || s->frame < 1)
-                s->frame_mov = 0 - s->frame_mov;
-        }
+        if(s->frame > 3 || s->frame < 1)
+            s->frame_mov = 0 - s->frame_mov;
+
+        /* if (s->loc.x < 0 - sparkle_img[0]->w) */
+        /*     remove_sparkle(s); */
 
         s = next;
     }
 }
 
-int
-main( int argc, char *argv[] )
+int main( int argc, char *argv[] )
 {
     int i, draw_time, last_draw, curr_frame = 0;
 
