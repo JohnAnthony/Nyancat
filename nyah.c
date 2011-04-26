@@ -60,9 +60,9 @@ add_sparkle(void) {
 
     new->loc.x = SCREEN_WIDTH + 80;
     new->loc.y = (rand() % (SCREEN_HEIGHT + sparkle_img[0]->h)) - sparkle_img[0]->h;
-    new->frame = rand() % 5;
+    new->frame = rand() % 4;
     new->frame_mov = 1;
-    new->speed = 80 + (rand() % 120);
+    new->speed = 10 + (rand() % 30);
     new->layer = rand() % 2;
     new->next = NULL;
 
@@ -210,8 +210,8 @@ update_sparkles(void) {
         if(s->frame > 3 || s->frame < 1)
             s->frame_mov = 0 - s->frame_mov;
 
-        /* if (s->loc.x < 0 - sparkle_img[0]->w) */
-        /*     remove_sparkle(s); */
+        if (s->loc.x < 0 - sparkle_img[0]->w)
+            remove_sparkle(s);
 
         s = next;
     }
