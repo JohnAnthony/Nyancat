@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define CLEARSCR()      (fillsquare(screen, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, bgcolor))
+#define CLEARSCR()      (fillsquare(screen, 0, 0, screen->w, screen->h, bgcolor))
 
 typedef struct {
     int x, y;
@@ -47,8 +47,6 @@ void remove_sparkle(sparkle_instance* s);
 void start_music(void);
 void update_sparkles(void);
 
-unsigned int            SCREEN_WIDTH = 1920;
-unsigned int            SCREEN_HEIGHT = 1080;
 unsigned int            FRAMERATE = 14;
 unsigned int            SCREEN_BPP = 32;
 
@@ -64,8 +62,8 @@ add_sparkle(void) {
 
     new = malloc(sizeof(sparkle_instance));
 
-    new->loc.x = SCREEN_WIDTH + 80;
-    new->loc.y = (rand() % (SCREEN_HEIGHT + sparkle_img[0]->h)) - sparkle_img[0]->h;
+    new->loc.x = screen->w + 80;
+    new->loc.y = (rand() % (screen->h + sparkle_img[0]->h)) - sparkle_img[0]->h;
     new->frame = rand() % 4;
     new->frame_mov = 1;
     new->speed = 10 + (rand() % 30);
@@ -279,14 +277,17 @@ int main( int argc, char *argv[] )
     srand( time(NULL) );
 
     SDL_Init( SDL_INIT_EVERYTHING );
-    screen = SDL_SetVideoMode( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, SURF_TYPE);
+    screen = SDL_SetVideoMode( 0, 0, SCREEN_BPP, SURF_TYPE | SDL_FULLSCREEN );
+    Mix_OpenAudio( 44100, AUDIO_S16, 2, 256 );
 
     load_images();
     load_music();
+
+    Mix_PlayMusic(music, 0);
     
     bgcolor = SDL_MapRGB(screen->format, 0x00, 0x33, 0x66);
 
-    add_cat((SCREEN_WIDTH - cat_img[0]->w) / 2 , (SCREEN_HEIGHT - cat_img[0]->h) / 2);
+    add_cat((screen->w - cat_img[0]->w) / 2 , (screen->h - cat_img[0]->h) / 2);
 
     /* clear initial input */
     while( SDL_PollEvent( &event ) ) {}
