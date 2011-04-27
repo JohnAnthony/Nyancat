@@ -45,7 +45,7 @@ struct sparkle_instance {
 static void add_sparkle(void);
 static void add_cat(unsigned int x, unsigned int y);
 static void draw_cats(unsigned int frame);
-static void draw_sparkles(unsigned int layer);
+static void draw_sparkles(void);
 static void fillsquare(SDL_Surface* surf, int x, int y, int w, int h, Uint32 col);
 static void handleinput(void);
 #ifdef XINERAMA
@@ -144,16 +144,14 @@ draw_cats(unsigned int frame) {
 }
 
 void
-draw_sparkles(unsigned int layer) {
+draw_sparkles() {
     sparkle_instance* s = sparkles_list;
     SDL_Rect pos;
 
     while (s) {
-        if (s->layer == layer) {
-            pos.x = s->loc.x;
-            pos.y = s->loc.y;
-            SDL_BlitSurface( sparkle_img[s->frame], NULL, screen, &pos );
-        }
+        pos.x = s->loc.x;
+        pos.y = s->loc.y;
+        SDL_BlitSurface( sparkle_img[s->frame], NULL, screen, &pos );
         s = s->next;
     }
 }
@@ -323,14 +321,14 @@ int main( int argc, char *argv[] )
         Mix_PlayMusic(music, 0);
     }
 
-    #ifdef XINERAMA
+#ifdef XINERAMA
     if (!(dpy = XOpenDisplay(NULL)))
         puts("Failed to open Xinerama display information.");
     else
         xinerama_add_cats();
-    #else
-        add_cat((screen->w - cat_img[0]->w) / 2 , (screen->h - cat_img[0]->h) / 2);
-    #endif /* Xinerama */
+#else
+    add_cat((screen->w - cat_img[0]->w) / 2 , (screen->h - cat_img[0]->h) / 2);
+#endif /* Xinerama */
 
     /* clear initial input */
     while( SDL_PollEvent( &event ) ) {}
@@ -345,9 +343,8 @@ int main( int argc, char *argv[] )
         last_draw = SDL_GetTicks();
 
         CLEARSCR();
-        draw_sparkles(0);
+        draw_sparkles();
         draw_cats(curr_frame);
-        draw_sparkles(1);
 
         update_sparkles();
         handleinput();
