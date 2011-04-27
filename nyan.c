@@ -65,6 +65,7 @@ static SDL_Surface*         screen = NULL;
 static SDL_Event            event;
 static int                  running = 1;
 static int                  SURF_TYPE = SDL_HWSURFACE;
+static int                  sound = 1;
 #ifdef XINERAMA
 static Display* dpy;
 #endif /* XINERAMA */
@@ -131,7 +132,6 @@ draw_cats(unsigned int frame) {
     SDL_Rect pos;
 
     while (c) {
-
         pos.x = c->loc.x;
         pos.y = c->loc.y;
 
@@ -139,7 +139,6 @@ draw_cats(unsigned int frame) {
             pos.y -= 5;
         
         SDL_BlitSurface( cat_img[frame], NULL, screen, &pos );
-
         c = c->next;
     }
 }
@@ -229,26 +228,14 @@ load_images(void) {
 
 SDL_Surface*
 load_image( const char* path ) {
-    //Temporary storage for the image that's loaded
     SDL_Surface* loadedImage = NULL;
-
-    //The optimized image that will be used
     SDL_Surface* optimizedImage = NULL;
 
-    //Load the image
     loadedImage = IMG_Load( path );
-
-    //If nothing went wrong in loading the image
-    if(loadedImage)
-    {
-        //Create an optimized image
+    if(loadedImage) {
         optimizedImage = SDL_DisplayFormatAlpha( loadedImage );
-
-        //Free the old image
         SDL_FreeSurface( loadedImage );
     }
-
-    //Return the optimized image
     return optimizedImage;
 }
 
@@ -319,6 +306,8 @@ int main( int argc, char *argv[] )
             SURF_TYPE = SDL_HWSURFACE;
         else if (!strcmp(argv[i], "-sw"))
             SURF_TYPE = SDL_SWSURFACE;
+        else if(!strcmp(argv[i], "--nosound"))
+            sound = 0;
     }
 
     SDL_Init( SDL_INIT_EVERYTHING );
@@ -328,9 +317,11 @@ int main( int argc, char *argv[] )
     load_images();
     bgcolor = SDL_MapRGB(screen->format, 0x00, 0x33, 0x66);
 
-    Mix_OpenAudio( 44100, AUDIO_S16, 2, 256 );
-    load_music();
-    Mix_PlayMusic(music, 0);
+    if(sound) {
+        Mix_OpenAudio( 44100, AUDIO_S16, 2, 256 );
+        load_music();
+        Mix_PlayMusic(music, 0);
+    }
 
     #ifdef XINERAMA
     if (!(dpy = XOpenDisplay(NULL)))
