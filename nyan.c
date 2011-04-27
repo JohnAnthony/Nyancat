@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <time.h>
 #ifdef XINERAMA
+#include <X11/Xlib.h>
 #include <X11/extensions/Xinerama.h>
 #endif /* XINERAMA */
 
@@ -64,6 +65,7 @@ static                  SDL_Event event;
 static int              running = 1;
 static int              SURF_TYPE = SDL_HWSURFACE;
 
+static Display* dpy;
 static SDL_Surface* cat_img[5];
 static SDL_Surface* sparkle_img[5];
 static Mix_Music* music;
