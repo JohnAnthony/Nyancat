@@ -42,36 +42,36 @@ struct sparkle_instance {
 };
 
 /* Predecs */
-void add_sparkle(void);
-void add_cat(unsigned int x, unsigned int y);
-void draw_cats(unsigned int frame);
-void draw_sparkles(unsigned int layer);
-void fillsquare(SDL_Surface* surf, int x, int y, int w, int h, Uint32 col);
-void handleinput(void);
-void load_images(void);
-SDL_Surface* load_image(const char* path);
-void load_music(void);
-void putpix(SDL_Surface* surf, int x, int y, Uint32 col);
-void remove_sparkle(sparkle_instance* s);
-void start_music(void);
-void update_sparkles(void);
+static void add_sparkle(void);
+static void add_cats(unsigned int x, unsigned int y);
+static void draw_cats(unsigned int frame);
+static void draw_sparkles(unsigned int layer);
+static void fillsquare(SDL_Surface* surf, int x, int y, int w, int h, Uint32 col);
+static void handleinput(void);
+static void init_xinerama(void);
+static void load_images(void);
+static SDL_Surface* load_image(const char* path);
+static void load_music(void);
+static void putpix(SDL_Surface* surf, int x, int y, Uint32 col);
+static void remove_sparkle(sparkle_instance* s);
+static void update_sparkles(void);
 
 /* Globals */
-unsigned int            FRAMERATE = 14;
-unsigned int            SCREEN_BPP = 32;
-
-static                  SDL_Surface *screen = NULL;
-static                  SDL_Event event;
-static int              running = 1;
-static int              SURF_TYPE = SDL_HWSURFACE;
-
+static unsigned int         FRAMERATE = 14;
+static unsigned int         SCREEN_BPP = 32;
+static SDL_Surface*         screen = NULL;
+static SDL_Event            event;
+static int                  running = 1;
+static int                  SURF_TYPE = SDL_HWSURFACE;
+#ifdef XINERAMA
 static Display* dpy;
-static SDL_Surface* cat_img[5];
-static SDL_Surface* sparkle_img[5];
-static Mix_Music* music;
-static sparkle_instance* sparkles_list = NULL;
-static cat_instance* cat_list = NULL;
-static Uint32 bgcolor;
+#endif /* XINERAMA */
+static SDL_Surface*         cat_img[5];
+static SDL_Surface*         sparkle_img[5];
+static Mix_Music*           music;
+static sparkle_instance*    sparkles_list = NULL;
+static cat_instance*        cat_list = NULL;
+static Uint32               bgcolor;
 
 void
 add_sparkle(void) {
@@ -101,7 +101,7 @@ add_sparkle(void) {
 }
 
 void
-add_cat(unsigned int x, unsigned int y) {
+add_cats(unsigned int x, unsigned int y) {
     cat_instance* c = cat_list;
     cat_instance* new;
 
@@ -180,6 +180,13 @@ handleinput(void) {
         }
     }
 }
+
+#ifdef XINERAMA
+void
+init_xinerama(void) {
+
+}
+#endif /* XINERAMA */
 
 void
 load_images(void) {
@@ -269,12 +276,6 @@ remove_sparkle(sparkle_instance* s) {
 }
 
 void
-start_music(void) {
-    if(Mix_PlayMusic(music, 0) == -1)
-        printf("Unable to play Ogg file: %s\n", Mix_GetError());
-}
-
-void
 update_sparkles(void) {
     sparkle_instance* next, *s = sparkles_list;
 
@@ -309,6 +310,13 @@ int main( int argc, char *argv[] )
             SURF_TYPE = SDL_SWSURFACE;
     }
 
+    #ifdef XINERAMA
+    if (!(dpy = XOpenDisplay(NULL)))
+        puts("Failed to open Xinerama display information.");
+    else
+        init_xinerama();
+    #endif /* Xinerama */
+
     srand( time(NULL) );
 
     SDL_Init( SDL_INIT_EVERYTHING );
@@ -322,7 +330,7 @@ int main( int argc, char *argv[] )
 
     bgcolor = SDL_MapRGB(screen->format, 0x00, 0x33, 0x66);
 
-    add_cat((screen->w - cat_img[0]->w) / 2 , (screen->h - cat_img[0]->h) / 2);
+    add_cats((screen->w - cat_img[0]->w) / 2 , (screen->h - cat_img[0]->h) / 2);
 
     /* clear initial input */
     while( SDL_PollEvent( &event ) ) {}
