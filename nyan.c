@@ -311,6 +311,8 @@ int main( int argc, char *argv[] )
 {
     int i, draw_time, last_draw, curr_frame = 0;
 
+    srand( time(NULL) );
+
     /* Handle flags */
     for (i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "-hw"))
@@ -319,19 +321,16 @@ int main( int argc, char *argv[] )
             SURF_TYPE = SDL_SWSURFACE;
     }
 
-
-    srand( time(NULL) );
-
     SDL_Init( SDL_INIT_EVERYTHING );
     screen = SDL_SetVideoMode( 0, 0, SCREEN_BPP, SURF_TYPE | SDL_FULLSCREEN );
-    Mix_OpenAudio( 44100, AUDIO_S16, 2, 256 );
+    /* SDL_ShowCursor(0); */
 
     load_images();
-    load_music();
-
-    Mix_PlayMusic(music, 0);
-
     bgcolor = SDL_MapRGB(screen->format, 0x00, 0x33, 0x66);
+
+    Mix_OpenAudio( 44100, AUDIO_S16, 2, 256 );
+    load_music();
+    Mix_PlayMusic(music, 0);
 
     #ifdef XINERAMA
     if (!(dpy = XOpenDisplay(NULL)))
@@ -341,7 +340,6 @@ int main( int argc, char *argv[] )
     #else
         add_cat((screen->w - cat_img[0]->w) / 2 , (screen->h - cat_img[0]->h) / 2);
     #endif /* Xinerama */
-
 
     /* clear initial input */
     while( SDL_PollEvent( &event ) ) {}
