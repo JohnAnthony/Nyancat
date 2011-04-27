@@ -14,9 +14,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#ifdef XINERAMA
+#include <X11/extensions/Xinerama.h>
+#endif /* XINERAMA */
 
 #define CLEARSCR()      (fillsquare(screen, 0, 0, screen->w, screen->h, bgcolor))
 
+/* Type definitions */
 typedef struct {
     int x, y;
 } coords;
@@ -36,13 +40,7 @@ struct sparkle_instance {
     sparkle_instance* next;
 };
 
-SDL_Surface* cat_img[5];
-SDL_Surface* sparkle_img[5];
-Mix_Music* music;
-sparkle_instance* sparkles_list = NULL;
-cat_instance* cat_list = NULL;
-Uint32 bgcolor;
-
+/* Predecs */
 void add_sparkle(void);
 void add_cat(unsigned int x, unsigned int y);
 void draw_cats(unsigned int frame);
@@ -57,6 +55,7 @@ void remove_sparkle(sparkle_instance* s);
 void start_music(void);
 void update_sparkles(void);
 
+/* Globals */
 unsigned int            FRAMERATE = 14;
 unsigned int            SCREEN_BPP = 32;
 
@@ -64,6 +63,13 @@ static                  SDL_Surface *screen = NULL;
 static                  SDL_Event event;
 static int              running = 1;
 static int              SURF_TYPE = SDL_HWSURFACE;
+
+static SDL_Surface* cat_img[5];
+static SDL_Surface* sparkle_img[5];
+static Mix_Music* music;
+static sparkle_instance* sparkles_list = NULL;
+static cat_instance* cat_list = NULL;
+static Uint32 bgcolor;
 
 void
 add_sparkle(void) {

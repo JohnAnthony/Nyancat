@@ -2,4 +2,3 @@
 -- Add Xinerama support (one cat per monitor)
 -- Add command-line args
 -- Add rc file
--- Make a proper install
