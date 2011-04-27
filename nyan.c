@@ -19,8 +19,6 @@
 #include <X11/extensions/Xinerama.h>
 #endif /* XINERAMA */
 
-#define CLEARSCR()      (fillsquare(screen, 0, 0, screen->w, screen->h, bgcolor))
-
 /* Type definitions */
 typedef struct {
     int x, y;
@@ -44,6 +42,7 @@ struct sparkle_instance {
 /* Predecs */
 static void add_sparkle(void);
 static void add_cat(unsigned int x, unsigned int y);
+static void clear_screen(void);
 static void draw_cats(unsigned int frame);
 static void draw_sparkles(void);
 static void fillsquare(SDL_Surface* surf, int x, int y, int w, int h, Uint32 col);
@@ -69,6 +68,7 @@ static int                  sound = 1;
 #ifdef XINERAMA
 static Display* dpy;
 #endif /* XINERAMA */
+static int                  curr_frame = 0;
 static SDL_Surface*         cat_img[5];
 static SDL_Surface*         sparkle_img[5];
 static Mix_Music*           music;
@@ -127,6 +127,24 @@ add_cat(unsigned int x, unsigned int y) {
 }
 
 void
+clear_screen(void) {
+    sparkle_instance *s = sparkles_list;
+    cat_instance *c = cat_list;
+
+    while (c) {
+        /* This is bad. These magic numbers are to make up for uneven image sizes */
+        fillsquare(screen, c->loc.x, c->loc.y - (curr_frame < 2 ? 0 : 5), cat_img[curr_frame]->w + 6, cat_img[curr_frame]->h + 5, bgcolor);
+        c = c->next;
+    }
+
+    while (s) {
+        fillsquare(screen, s->loc.x, s->loc.y, sparkle_img[s->frame]->w, sparkle_img[s->frame]->h, bgcolor);
+        s = s->next;
+    }
+}
+
+
+void
 draw_cats(unsigned int frame) {
     cat_instance* c = cat_list;;
     SDL_Rect pos;
@@ -160,11 +178,26 @@ void
 fillsquare(SDL_Surface* surf, int x, int y, int w, int h, Uint32 col) {
     int i, e;
 
-    /* Placement of random pixels for every pixel on the screen */
-    for (i = 0; i < h; i++)
-        for (e = 0; e < w; e++) {
-            putpix(surf, x + e, y + i, col);
-        }
+    if (x + w < 0 || y + h < 0 || x > surf->w || y > surf->h)
+        return;
+
+    /* Sanitising of inputs. Make sure we're not drawing off of the surface */
+    if (x + w > surf->w)
+        w = surf->w - x;
+    if (y + h > surf->h)
+        h = surf->h - y;
+    if (x < 0) {
+        w += x;
+        x = 0;
+    }
+    if (y < 0) {
+        h += y;
+        y = 0;
+    }
+
+    for (i = x; i < x + w; i++)
+        for (e = y; e < y + h; e++)
+            putpix(surf, i, e, col);
 }
 
 void
@@ -294,7 +327,7 @@ update_sparkles(void) {
 
 int main( int argc, char *argv[] )
 {
-    int i, draw_time, last_draw, curr_frame = 0;
+    int i, draw_time, last_draw;
 
     srand( time(NULL) );
 
@@ -314,6 +347,7 @@ int main( int argc, char *argv[] )
 
     load_images();
     bgcolor = SDL_MapRGB(screen->format, 0x00, 0x33, 0x66);
+    fillsquare(screen, 0, 0, screen->w, screen->h, bgcolor);
 
     if(sound) {
         Mix_OpenAudio( 44100, AUDIO_S16, 2, 256 );
@@ -342,11 +376,11 @@ int main( int argc, char *argv[] )
     {
         last_draw = SDL_GetTicks();
 
-        CLEARSCR();
+        clear_screen();
+        update_sparkles();
         draw_sparkles();
         draw_cats(curr_frame);
 
-        update_sparkles();
         handleinput();
         SDL_Flip(screen);
 

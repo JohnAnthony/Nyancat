@@ -9,7 +9,7 @@ XINERAMALIBS = -L/usr/X11R6/lib -lXinerama
 XINERAMAFLAGS = -DXINERAMA
 
 nyancat:  nyan.c
-	cc -g nyan.c -o nyancat ${LIBS} ${XINERAMALIBS} ${XINERAMAINC} ${FLAGS} ${XINERAMAFLAGS}
+	cc -g nyan.c -o nyancat ${LIBS} ${XINERAMALIBS} ${XINERAMAINC} ${FLAGS} ${XINERAMAFLAGS} -ggdb
 
 install:
 	cp nyancat ${BIN}
