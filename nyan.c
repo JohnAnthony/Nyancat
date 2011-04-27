@@ -275,8 +275,8 @@ void
 update_sparkles(void) {
     sparkle_instance* next, *s = sparkles_list;
 
-    add_sparkle();
-    add_sparkle();
+    if(rand() %2)
+        add_sparkle();
 
     while(s) {
         s->loc.x -= s->speed;
