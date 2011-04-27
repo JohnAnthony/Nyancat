@@ -1,15 +1,19 @@
+RES = /usr/share/nyancat
+BIN = /usr/bin/nyancat
+LIBS = -lSDL -lSDL_image -lSDL_mixer
+FLAGS = -Wall
+
 nyancat:  nyan.c
-	gcc -g nyan.c -o nyancat -lSDL -lSDL_image -lSDL_mixer -Wall
-	chmod +x nyancat
+	cc -g nyan.c -o nyancat ${LIBS} ${FLAGS}
 
 install:
-	cp nyancat /usr/bin
-	mkdir --parents /usr/share/nyancat
-	cp -v res/* /usr/share/nyancat
+	cp nyancat ${BIN}
+	mkdir --parents ${RES}
+	cp -v res/* ${RES}
 
 clean:
 	rm nyancat
 
 uninstall:
-	rm /usr/bin/nyancat
-	rm -rv /usr/share/nyancat
+	rm ${BIN}
+	rm -rv ${RES}
