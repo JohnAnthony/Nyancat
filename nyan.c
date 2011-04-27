@@ -43,12 +43,12 @@ struct sparkle_instance {
 
 /* Predecs */
 static void add_sparkle(void);
-static void add_cats(unsigned int x, unsigned int y);
+static void add_cat(unsigned int x, unsigned int y);
 static void draw_cats(unsigned int frame);
 static void draw_sparkles(unsigned int layer);
 static void fillsquare(SDL_Surface* surf, int x, int y, int w, int h, Uint32 col);
 static void handleinput(void);
-static void init_xinerama(void);
+static void xinerama_add_cats(void);
 static void load_images(void);
 static SDL_Surface* load_image(const char* path);
 static void load_music(void);
@@ -101,7 +101,7 @@ add_sparkle(void) {
 }
 
 void
-add_cats(unsigned int x, unsigned int y) {
+add_cat(unsigned int x, unsigned int y) {
     cat_instance* c = cat_list;
     cat_instance* new;
 
@@ -183,8 +183,15 @@ handleinput(void) {
 
 #ifdef XINERAMA
 void
-init_xinerama(void) {
+xinerama_add_cats(void) {
+    int i, nn;
+    XineramaScreenInfo* info = XineramaQueryScreens(dpy, &nn);
 
+    for (i = 0; i < nn; ++i)
+        add_cat((info[i].x_org + info[i].width - cat_img[0]->w) / 2, (info[i].y_org + info[i].height - cat_img[0]->h) / 2);
+
+    XFree(info);
+    XCloseDisplay(dpy);
 }
 #endif /* XINERAMA */
 
@@ -310,12 +317,6 @@ int main( int argc, char *argv[] )
             SURF_TYPE = SDL_SWSURFACE;
     }
 
-    #ifdef XINERAMA
-    if (!(dpy = XOpenDisplay(NULL)))
-        puts("Failed to open Xinerama display information.");
-    else
-        init_xinerama();
-    #endif /* Xinerama */
 
     srand( time(NULL) );
 
@@ -330,7 +331,15 @@ int main( int argc, char *argv[] )
 
     bgcolor = SDL_MapRGB(screen->format, 0x00, 0x33, 0x66);
 
-    add_cats((screen->w - cat_img[0]->w) / 2 , (screen->h - cat_img[0]->h) / 2);
+    #ifdef XINERAMA
+    if (!(dpy = XOpenDisplay(NULL)))
+        puts("Failed to open Xinerama display information.");
+    else
+        xinerama_add_cats();
+    #else
+        add_cat((screen->w - cat_img[0]->w) / 2 , (screen->h - cat_img[0]->h) / 2);
+    #endif /* Xinerama */
+
 
     /* clear initial input */
     while( SDL_PollEvent( &event ) ) {}
