@@ -48,7 +48,9 @@ static void draw_cats(unsigned int frame);
 static void draw_sparkles(unsigned int layer);
 static void fillsquare(SDL_Surface* surf, int x, int y, int w, int h, Uint32 col);
 static void handleinput(void);
+#ifdef XINERAMA
 static void xinerama_add_cats(void);
+#endif /* XINERAMA */
 static void load_images(void);
 static SDL_Surface* load_image(const char* path);
 static void load_music(void);
@@ -188,7 +190,7 @@ xinerama_add_cats(void) {
     XineramaScreenInfo* info = XineramaQueryScreens(dpy, &nn);
 
     for (i = 0; i < nn; ++i)
-        add_cat((info[i].x_org + info[i].width - cat_img[0]->w) / 2, (info[i].y_org + info[i].height - cat_img[0]->h) / 2);
+        add_cat(info[i].x_org + ((info[i].width - cat_img[0]->w) / 2), info[i].y_org + ((info[i].height - cat_img[0]->h) / 2));
 
     XFree(info);
     XCloseDisplay(dpy);
