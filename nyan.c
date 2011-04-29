@@ -68,12 +68,13 @@ static int                  sound = 1;
 #ifdef XINERAMA
 static Display* dpy;
 #endif /* XINERAMA */
+static cat_instance*        cat_list = NULL;
 static int                  curr_frame = 0;
+static int                  sparkle_spawn_counter = 0;
+static Mix_Music*           music;
 static SDL_Surface*         cat_img[5];
 static SDL_Surface*         sparkle_img[5];
-static Mix_Music*           music;
 static sparkle_instance*    sparkles_list = NULL;
-static cat_instance*        cat_list = NULL;
 static Uint32               bgcolor;
 
 void
@@ -109,7 +110,6 @@ add_cat(unsigned int x, unsigned int y) {
     cat_instance* new;
 
     new = malloc(sizeof(cat_instance));
-
     new->loc.x = x;
     new->loc.y = y;
     new->next = NULL;
@@ -229,6 +229,8 @@ xinerama_add_cats(void) {
 
 void
 load_images(void) {
+    /* This obviously needs work */
+    /* Needs to be replaced with a loop */
     cat_img[0] = load_image("res/frame00.png");
     if(!cat_img[0]) {
         cat_img[0] = load_image("/usr/share/nyancat/frame00.png");
@@ -306,8 +308,12 @@ void
 update_sparkles(void) {
     sparkle_instance* next, *s = sparkles_list;
 
-    if(rand() %2)
+    sparkle_spawn_counter += rand() % screen->h;
+
+    while(sparkle_spawn_counter >= 1000) {
         add_sparkle();
+        sparkle_spawn_counter -= 1000;
+    }
 
     while(s) {
         s->loc.x -= s->speed;
