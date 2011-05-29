@@ -46,16 +46,17 @@ static void clear_screen(void);
 static void draw_cats(unsigned int frame);
 static void draw_sparkles(void);
 static void fillsquare(SDL_Surface* surf, int x, int y, int w, int h, Uint32 col);
-static void handleinput(void);
-#ifdef XINERAMA
-static void xinerama_add_cats(void);
-#endif /* XINERAMA */
+static void handle_args(int argc, char** argv);
+static void handle_input(void);
 static void load_images(void);
 static SDL_Surface* load_image(const char* path);
 static void load_music(void);
 static void putpix(SDL_Surface* surf, int x, int y, Uint32 col);
 static void remove_sparkle(sparkle_instance* s);
 static void update_sparkles(void);
+#ifdef XINERAMA
+static void xinerama_add_cats(void);
+#endif /* XINERAMA */
 
 /* Globals */
 static unsigned int         FRAMERATE = 14;
@@ -201,7 +202,20 @@ fillsquare(SDL_Surface* surf, int x, int y, int w, int h, Uint32 col) {
 }
 
 void
-handleinput(void) {
+handle_args(int argc, char **argv) {
+    int i;
+    for (i = 1; i < argc; i++) {
+        if (!strcmp(argv[i], "-hw"))
+            SURF_TYPE = SDL_HWSURFACE;
+        else if (!strcmp(argv[i], "-sw"))
+            SURF_TYPE = SDL_SWSURFACE;
+        else if(!strcmp(argv[i], "--nosound"))
+            sound = 0;
+    }
+}
+
+void
+handle_input(void) {
     while( SDL_PollEvent( &event ) ) {   
         switch (event.type) {
             case SDL_KEYDOWN:
@@ -309,7 +323,6 @@ update_sparkles(void) {
     sparkle_instance* next, *s = sparkles_list;
 
     sparkle_spawn_counter += rand() % screen->h;
-
     while(sparkle_spawn_counter >= 1000) {
         add_sparkle();
         sparkle_spawn_counter -= 1000;
@@ -331,21 +344,13 @@ update_sparkles(void) {
     }
 }
 
-int main( int argc, char *argv[] )
+int main( int argc, char **argv )
 {
     int i, draw_time, last_draw;
 
-    srand( time(NULL) );
+    handle_args(argc, argv);
 
-    /* Handle flags */
-    for (i = 1; i < argc; i++) {
-        if (!strcmp(argv[i], "-hw"))
-            SURF_TYPE = SDL_HWSURFACE;
-        else if (!strcmp(argv[i], "-sw"))
-            SURF_TYPE = SDL_SWSURFACE;
-        else if(!strcmp(argv[i], "--nosound"))
-            sound = 0;
-    }
+    srand( time(NULL) );
 
     SDL_Init( SDL_INIT_EVERYTHING );
     screen = SDL_SetVideoMode( 0, 0, SCREEN_BPP, SURF_TYPE | SDL_FULLSCREEN );
@@ -387,7 +392,7 @@ int main( int argc, char *argv[] )
         draw_sparkles();
         draw_cats(curr_frame);
 
-        handleinput();
+        handle_input();
         SDL_Flip(screen);
 
         /* Frame increment and looping */
