@@ -42,17 +42,20 @@ struct sparkle_instance {
 /* Predecs */
 static void add_sparkle(void);
 static void add_cat(unsigned int x, unsigned int y);
+static void cleanup(void);
 static void clear_screen(void);
 static void draw_cats(unsigned int frame);
 static void draw_sparkles(void);
 static void fillsquare(SDL_Surface* surf, int x, int y, int w, int h, Uint32 col);
 static void handle_args(int argc, char** argv);
 static void handle_input(void);
+static void init(void);
 static void load_images(void);
 static SDL_Surface* load_image(const char* path);
 static void load_music(void);
 static void putpix(SDL_Surface* surf, int x, int y, Uint32 col);
 static void remove_sparkle(sparkle_instance* s);
+static void run(void);
 static void update_sparkles(void);
 #ifdef XINERAMA
 static void xinerama_add_cats(void);
@@ -78,7 +81,7 @@ static SDL_Surface*         sparkle_img[5];
 static sparkle_instance*    sparkles_list = NULL;
 static Uint32               bgcolor;
 
-void
+static void
 add_sparkle(void) {
     sparkle_instance* s = sparkles_list;
     sparkle_instance* new;
@@ -105,7 +108,7 @@ add_sparkle(void) {
     s->next = new;
 }
 
-void
+static void
 add_cat(unsigned int x, unsigned int y) {
     cat_instance* c = cat_list;
     cat_instance* new;
@@ -127,7 +130,16 @@ add_cat(unsigned int x, unsigned int y) {
     c->next = new;
 }
 
-void
+static void
+cleanup(void) {
+    Mix_HaltMusic();
+    Mix_FreeMusic(music);
+    Mix_CloseAudio();
+    SDL_Quit();
+}
+
+
+static void
 clear_screen(void) {
     sparkle_instance *s = sparkles_list;
     cat_instance *c = cat_list;
@@ -145,7 +157,7 @@ clear_screen(void) {
 }
 
 
-void
+static void
 draw_cats(unsigned int frame) {
     cat_instance* c = cat_list;;
     SDL_Rect pos;
@@ -162,7 +174,7 @@ draw_cats(unsigned int frame) {
     }
 }
 
-void
+static void
 draw_sparkles() {
     sparkle_instance* s = sparkles_list;
     SDL_Rect pos;
@@ -175,7 +187,7 @@ draw_sparkles() {
     }
 }
 
-void
+static void
 fillsquare(SDL_Surface* surf, int x, int y, int w, int h, Uint32 col) {
     int i, e;
 
@@ -201,7 +213,7 @@ fillsquare(SDL_Surface* surf, int x, int y, int w, int h, Uint32 col) {
             putpix(surf, i, e, col);
 }
 
-void
+static void
 handle_args(int argc, char **argv) {
     int i;
     for (i = 1; i < argc; i++) {
@@ -214,7 +226,7 @@ handle_args(int argc, char **argv) {
     }
 }
 
-void
+static void
 handle_input(void) {
     while( SDL_PollEvent( &event ) ) {   
         switch (event.type) {
@@ -227,128 +239,9 @@ handle_input(void) {
     }
 }
 
-#ifdef XINERAMA
-void
-xinerama_add_cats(void) {
-    int i, nn;
-    XineramaScreenInfo* info = XineramaQueryScreens(dpy, &nn);
-
-    for (i = 0; i < nn; ++i)
-        add_cat(info[i].x_org + ((info[i].width - cat_img[0]->w) / 2), info[i].y_org + ((info[i].height - cat_img[0]->h) / 2));
-
-    XFree(info);
-    XCloseDisplay(dpy);
-}
-#endif /* XINERAMA */
-
-void
-load_images(void) {
-    /* This obviously needs work */
-    /* Needs to be replaced with a loop */
-    cat_img[0] = load_image("res/frame00.png");
-    if(!cat_img[0]) {
-        cat_img[0] = load_image("/usr/share/nyancat/frame00.png");
-        cat_img[1] = load_image("/usr/share/nyancat/frame01.png");
-        cat_img[2] = load_image("/usr/share/nyancat/frame02.png");
-        cat_img[3] = load_image("/usr/share/nyancat/frame03.png");
-        cat_img[4] = load_image("/usr/share/nyancat/frame04.png");
-
-        sparkle_img[0] = load_image("/usr/share/nyancat/sparkle0.png");
-        sparkle_img[1] = load_image("/usr/share/nyancat/sparkle1.png");
-        sparkle_img[2] = load_image("/usr/share/nyancat/sparkle2.png");
-        sparkle_img[3] = load_image("/usr/share/nyancat/sparkle3.png");
-        sparkle_img[4] = load_image("/usr/share/nyancat/sparkle4.png");
-    }
-    else {
-        cat_img[1] = load_image("res/frame01.png");
-        cat_img[2] = load_image("res/frame02.png");
-        cat_img[3] = load_image("res/frame03.png");
-        cat_img[4] = load_image("res/frame04.png");
-
-        sparkle_img[0] = load_image("res/sparkle0.png");
-        sparkle_img[1] = load_image("res/sparkle1.png");
-        sparkle_img[2] = load_image("res/sparkle2.png");
-        sparkle_img[3] = load_image("res/sparkle3.png");
-        sparkle_img[4] = load_image("res/sparkle4.png");
-    }
-}
-
-SDL_Surface*
-load_image( const char* path ) {
-    SDL_Surface* loadedImage = NULL;
-    SDL_Surface* optimizedImage = NULL;
-
-    loadedImage = IMG_Load( path );
-    if(loadedImage) {
-        optimizedImage = SDL_DisplayFormatAlpha( loadedImage );
-        SDL_FreeSurface( loadedImage );
-    }
-    return optimizedImage;
-}
-
-void
-load_music(void) {
-    music = Mix_LoadMUS("res/nyan.ogg");
-    if (!music)
-        music = Mix_LoadMUS("/usr/share/nyancat/nyan.ogg");
-    if (!music)
-        printf("Unable to load Ogg file: %s\n", Mix_GetError());
-}
-
-void
-putpix(SDL_Surface* surf, int x, int y, Uint32 col) {
-    Uint32 *pix = (Uint32 *) surf->pixels;
-    pix [ ( y * surf->w ) + x ] = col;
-}
-
-void
-remove_sparkle(sparkle_instance* s) {
-    sparkle_instance* s2 = sparkles_list;
-
-    if (s2 == s) {
-        sparkles_list = s->next;
-        free(s);
-        return;
-    }
-
-    while (s2->next != s)
-        s2 = s2->next;
-
-    s2->next = s2->next->next;
-    free(s);
-}
-
-void
-update_sparkles(void) {
-    sparkle_instance* next, *s = sparkles_list;
-
-    sparkle_spawn_counter += rand() % screen->h;
-    while(sparkle_spawn_counter >= 1000) {
-        add_sparkle();
-        sparkle_spawn_counter -= 1000;
-    }
-
-    while(s) {
-        s->loc.x -= s->speed;
-        next = s->next;
-
-        s->frame += s->frame_mov;
-
-        if(s->frame > 3 || s->frame < 1)
-            s->frame_mov = 0 - s->frame_mov;
-
-        if (s->loc.x < 0 - sparkle_img[0]->w)
-            remove_sparkle(s);
-
-        s = next;
-    }
-}
-
-int main( int argc, char **argv )
-{
-    int i, draw_time, last_draw;
-
-    handle_args(argc, argv);
+static void
+init(void) {
+    int i;
 
     srand( time(NULL) );
 
@@ -381,8 +274,89 @@ int main( int argc, char **argv )
     /* Pre-populate with sparkles */
     for (i = 0; i < 200; i++)
         update_sparkles();
+}
 
-    /* Main loop */
+static void
+load_images(void) {
+    /* This obviously needs work */
+    /* Needs to be replaced with a loop */
+    cat_img[0] = load_image("res/frame00.png");
+    if(!cat_img[0]) {
+        cat_img[0] = load_image("/usr/share/nyancat/frame00.png");
+        cat_img[1] = load_image("/usr/share/nyancat/frame01.png");
+        cat_img[2] = load_image("/usr/share/nyancat/frame02.png");
+        cat_img[3] = load_image("/usr/share/nyancat/frame03.png");
+        cat_img[4] = load_image("/usr/share/nyancat/frame04.png");
+
+        sparkle_img[0] = load_image("/usr/share/nyancat/sparkle0.png");
+        sparkle_img[1] = load_image("/usr/share/nyancat/sparkle1.png");
+        sparkle_img[2] = load_image("/usr/share/nyancat/sparkle2.png");
+        sparkle_img[3] = load_image("/usr/share/nyancat/sparkle3.png");
+        sparkle_img[4] = load_image("/usr/share/nyancat/sparkle4.png");
+    }
+    else {
+        cat_img[1] = load_image("res/frame01.png");
+        cat_img[2] = load_image("res/frame02.png");
+        cat_img[3] = load_image("res/frame03.png");
+        cat_img[4] = load_image("res/frame04.png");
+
+        sparkle_img[0] = load_image("res/sparkle0.png");
+        sparkle_img[1] = load_image("res/sparkle1.png");
+        sparkle_img[2] = load_image("res/sparkle2.png");
+        sparkle_img[3] = load_image("res/sparkle3.png");
+        sparkle_img[4] = load_image("res/sparkle4.png");
+    }
+}
+
+static SDL_Surface*
+load_image( const char* path ) {
+    SDL_Surface* loadedImage = NULL;
+    SDL_Surface* optimizedImage = NULL;
+
+    loadedImage = IMG_Load( path );
+    if(loadedImage) {
+        optimizedImage = SDL_DisplayFormatAlpha( loadedImage );
+        SDL_FreeSurface( loadedImage );
+    }
+    return optimizedImage;
+}
+
+static void
+load_music(void) {
+    music = Mix_LoadMUS("res/nyan.ogg");
+    if (!music)
+        music = Mix_LoadMUS("/usr/share/nyancat/nyan.ogg");
+    if (!music)
+        printf("Unable to load Ogg file: %s\n", Mix_GetError());
+}
+
+static void
+putpix(SDL_Surface* surf, int x, int y, Uint32 col) {
+    Uint32 *pix = (Uint32 *) surf->pixels;
+    pix [ ( y * surf->w ) + x ] = col;
+}
+
+static void
+remove_sparkle(sparkle_instance* s) {
+    sparkle_instance* s2 = sparkles_list;
+
+    if (s2 == s) {
+        sparkles_list = s->next;
+        free(s);
+        return;
+    }
+
+    while (s2->next != s)
+        s2 = s2->next;
+
+    s2->next = s2->next->next;
+    free(s);
+}
+
+static void
+run(void) {
+    unsigned int last_draw, draw_time;
+
     while( running )
     {
         last_draw = SDL_GetTicks();
@@ -404,11 +378,55 @@ int main( int argc, char **argv )
         if (draw_time < (1000 / FRAMERATE))
             SDL_Delay((1000 / FRAMERATE) - draw_time);
     }
+}
 
-    Mix_HaltMusic();
-    Mix_FreeMusic(music);
-    Mix_CloseAudio();
 
-    SDL_Quit();
+
+static void
+update_sparkles(void) {
+    sparkle_instance* next, *s = sparkles_list;
+
+    sparkle_spawn_counter += rand() % screen->h;
+    while(sparkle_spawn_counter >= 1000) {
+        add_sparkle();
+        sparkle_spawn_counter -= 1000;
+    }
+
+    while(s) {
+        s->loc.x -= s->speed;
+        next = s->next;
+
+        s->frame += s->frame_mov;
+
+        if(s->frame > 3 || s->frame < 1)
+            s->frame_mov = 0 - s->frame_mov;
+
+        if (s->loc.x < 0 - sparkle_img[0]->w)
+            remove_sparkle(s);
+
+        s = next;
+    }
+}
+
+#ifdef XINERAMA
+static void
+xinerama_add_cats(void) {
+    int i, nn;
+    XineramaScreenInfo* info = XineramaQueryScreens(dpy, &nn);
+
+    for (i = 0; i < nn; ++i)
+        add_cat(info[i].x_org + ((info[i].width - cat_img[0]->w) / 2), info[i].y_org + ((info[i].height - cat_img[0]->h) / 2));
+
+    XFree(info);
+    XCloseDisplay(dpy);
+}
+#endif /* XINERAMA */
+
+int main( int argc, char **argv )
+{
+    handle_args(argc, argv);
+    init();
+    run();
+    cleanup();
     return 0;
 }
