@@ -46,12 +46,12 @@ static void cleanup(void);
 static void clear_screen(void);
 static void draw_cats(unsigned int frame);
 static void draw_sparkles(void);
-static void errout(char *str);
 static void fillsquare(SDL_Surface* surf, int x, int y, int w, int h, Uint32 col);
 static void handle_args(int argc, char** argv);
 static void handle_input(void);
 static void init(void);
 static void load_images(void);
+static void stretch_images(void);
 static SDL_Surface* load_image(const char* path);
 static void load_music(void);
 static void putpix(SDL_Surface* surf, int x, int y, Uint32 col);
@@ -79,6 +79,7 @@ static int                  sparkle_spawn_counter = 0;
 static Mix_Music*           music;
 static SDL_Surface*         cat_img[5];
 static SDL_Surface*         sparkle_img[5];
+static SDL_Surface*         stretch_cat[5];
 static sparkle_instance*    sparkles_list = NULL;
 static Uint32               bgcolor;
 
@@ -88,8 +89,6 @@ add_sparkle(void) {
     sparkle_instance* new;
 
     new = malloc(sizeof(sparkle_instance));
-    if(!new)
-        errout("Could not allocate new sparkle instance memory in add_sparkle.");
 
     new->loc.x = screen->w + 80;
     new->loc.y = (rand() % (screen->h + sparkle_img[0]->h)) - sparkle_img[0]->h;
@@ -107,7 +106,6 @@ add_sparkle(void) {
     /* Find end of list */
     while (s->next)
         s = s->next;
-    
     s->next = new;
 }
 
@@ -117,9 +115,6 @@ add_cat(unsigned int x, unsigned int y) {
     cat_instance* new;
 
     new = malloc(sizeof(cat_instance));
-    if(!new)
-        errout("Could not allocate new cat instance memory in add_cat.");
-
     new->loc.x = x;
     new->loc.y = y;
     new->next = NULL;
@@ -152,7 +147,7 @@ clear_screen(void) {
 
     while (c) {
         /* This is bad. These magic numbers are to make up for uneven image sizes */
-        fillsquare(screen, c->loc.x, c->loc.y - (curr_frame < 2 ? 0 : 5), cat_img[curr_frame]->w + 6, cat_img[curr_frame]->h + 5, bgcolor);
+        fillsquare(screen, c->loc.x, c->loc.y - (curr_frame < 2 ? 0 : 5), stretch_cat[curr_frame]->w + 6, stretch_cat[curr_frame]->h + 5, bgcolor);
         c = c->next;
     }
 
@@ -160,22 +155,25 @@ clear_screen(void) {
         fillsquare(screen, s->loc.x, s->loc.y, sparkle_img[s->frame]->w, sparkle_img[s->frame]->h, bgcolor);
         s = s->next;
     }
+
 }
 
 
 static void
 draw_cats(unsigned int frame) {
-    cat_instance* c = cat_list;;
+    cat_instance* c = cat_list;
     SDL_Rect pos;
 
     while (c) {
         pos.x = c->loc.x;
         pos.y = c->loc.y;
+//        pos.w = screen->w;
+//        pos.h = pos.w/cat_img[frame]->h*cat_img[frame]->w;
 
         if(frame < 2)
             pos.y -= 5;
-        
-        SDL_BlitSurface( cat_img[frame], NULL, screen, &pos );
+        SDL_BlitSurface( stretch_cat[frame], NULL, screen, &pos );
+//        SDL_SoftStretch(cat_img[frame],NULL,screen,NULL);
         c = c->next;
     }
 }
@@ -191,13 +189,6 @@ draw_sparkles() {
         SDL_BlitSurface( sparkle_img[s->frame], NULL, screen, &pos );
         s = s->next;
     }
-}
-
-static void
-errout (char *str) {
-    if (str)
-        puts(str);
-    exit(1);
 }
 
 static void
@@ -241,7 +232,7 @@ handle_args(int argc, char **argv) {
 
 static void
 handle_input(void) {
-    while( SDL_PollEvent( &event ) ) {   
+    while( SDL_PollEvent( &event ) ) {
         switch (event.type) {
             case SDL_KEYDOWN:
             case SDL_QUIT:
@@ -260,9 +251,10 @@ init(void) {
 
     SDL_Init( SDL_INIT_EVERYTHING );
     screen = SDL_SetVideoMode( 0, 0, SCREEN_BPP, SURF_TYPE | SDL_FULLSCREEN );
-    /* SDL_ShowCursor(0); */
+    SDL_ShowCursor(0);
 
     load_images();
+    stretch_images();
     bgcolor = SDL_MapRGB(screen->format, 0x00, 0x33, 0x66);
     fillsquare(screen, 0, 0, screen->w, screen->h, bgcolor);
 
@@ -278,7 +270,7 @@ init(void) {
     else
         xinerama_add_cats();
 #else
-    add_cat((screen->w - cat_img[0]->w) / 2 , (screen->h - cat_img[0]->h) / 2);
+    add_cat(0, (screen->h - stretch_cat[0]->h) / 2);
 #endif /* Xinerama */
 
     /* clear initial input */
@@ -318,6 +310,20 @@ load_images(void) {
         sparkle_img[2] = load_image("res/sparkle2.png");
         sparkle_img[3] = load_image("res/sparkle3.png");
         sparkle_img[4] = load_image("res/sparkle4.png");
+    }
+
+}
+
+static void
+stretch_images(void) {
+    SDL_Rect stretchto;
+    stretchto.w=screen->w;
+
+    SDL_PixelFormat fmt = *(screen->format);
+    for(int i=0;i<=4;i++) {
+        stretchto.h=stretchto.w*cat_img[i]->h/cat_img[i]->w;
+        stretch_cat[i] = SDL_CreateRGBSurface(SDL_SWSURFACE,stretchto.w,stretchto.h,SCREEN_BPP,fmt.Rmask,fmt.Gmask,fmt.Bmask,fmt.Amask);
+        SDL_SoftStretch(cat_img[i],NULL,stretch_cat[i],NULL);
     }
 }
 
@@ -428,7 +434,7 @@ xinerama_add_cats(void) {
     XineramaScreenInfo* info = XineramaQueryScreens(dpy, &nn);
 
     for (i = 0; i < nn; ++i)
-        add_cat(info[i].x_org + ((info[i].width - cat_img[0]->w) / 2), info[i].y_org + ((info[i].height - cat_img[0]->h) / 2));
+        add_cat(0, info[i].y_org + ((info[i].height - stretch_cat[0]->h) / 2));
 
     XFree(info);
     XCloseDisplay(dpy);
