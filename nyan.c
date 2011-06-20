@@ -46,6 +46,7 @@ static void cleanup(void);
 static void clear_screen(void);
 static void draw_cats(unsigned int frame);
 static void draw_sparkles(void);
+static void errout(char *str);
 static void fillsquare(SDL_Surface* surf, int x, int y, int w, int h, Uint32 col);
 static void handle_args(int argc, char** argv);
 static void handle_input(void);
@@ -87,6 +88,8 @@ add_sparkle(void) {
     sparkle_instance* new;
 
     new = malloc(sizeof(sparkle_instance));
+    if(!new)
+        errout("Could not allocate new sparkle instance memory in add_sparkle.");
 
     new->loc.x = screen->w + 80;
     new->loc.y = (rand() % (screen->h + sparkle_img[0]->h)) - sparkle_img[0]->h;
@@ -114,6 +117,9 @@ add_cat(unsigned int x, unsigned int y) {
     cat_instance* new;
 
     new = malloc(sizeof(cat_instance));
+    if(!new)
+        errout("Could not allocate new cat instance memory in add_cat.");
+
     new->loc.x = x;
     new->loc.y = y;
     new->next = NULL;
@@ -185,6 +191,13 @@ draw_sparkles() {
         SDL_BlitSurface( sparkle_img[s->frame], NULL, screen, &pos );
         s = s->next;
     }
+}
+
+static void
+errout (char *str) {
+    if (str)
+        puts(str);
+    exit(1);
 }
 
 static void
