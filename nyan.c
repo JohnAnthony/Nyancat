@@ -71,6 +71,9 @@ static SDL_Event            event;
 static int                  running = 1;
 static int                  SURF_TYPE = SDL_HWSURFACE;
 static int                  sound = 1;
+static int                  fullscreen = 1;
+static int                  catsize = 0;
+static int                  cursor = 0;
 #ifdef XINERAMA
 static Display* dpy;
 #endif /* XINERAMA */
@@ -153,7 +156,10 @@ clear_screen(void) {
 
     while (c) {
         /* This is bad. These magic numbers are to make up for uneven image sizes */
-        fillsquare(screen, c->loc.x, c->loc.y - (curr_frame < 2 ? 0 : 5), stretch_cat[curr_frame]->w + 6, stretch_cat[curr_frame]->h + 5, bgcolor);
+        if(catsize == 1)
+            fillsquare(screen, c->loc.x, c->loc.y - (curr_frame < 2 ? 0 : 5), stretch_cat[curr_frame]->w + 6, stretch_cat[curr_frame]->h + 5, bgcolor);
+        else
+            fillsquare(screen, c->loc.x, c->loc.y - (curr_frame < 2 ? 0 : 5), cat_img[curr_frame]->w + 6, cat_img[curr_frame]->h + 5, bgcolor);
         c = c->next;
     }
 
@@ -176,7 +182,10 @@ draw_cats(unsigned int frame) {
 
         if(frame < 2)
             pos.y -= 5;
-        SDL_BlitSurface( stretch_cat[frame], NULL, screen, &pos );
+        if(catsize == 1)
+            SDL_BlitSurface( stretch_cat[frame], NULL, screen, &pos );
+        else
+            SDL_BlitSurface( cat_img[frame], NULL, screen, &pos );
         c = c->next;
     }
 }
@@ -235,8 +244,33 @@ handle_args(int argc, char **argv) {
             SURF_TYPE = SDL_HWSURFACE;
         else if (!strcmp(argv[i], "-sw"))
             SURF_TYPE = SDL_SWSURFACE;
-        else if(!strcmp(argv[i], "--nosound"))
+        else if (!(strcmp(argv[i], "-f") && strcmp(argv[i], "--fullscreen")))
+            fullscreen = 1;
+        else if(!(strcmp(argv[i], "-nf") && strcmp(argv[i], "--nofullscreen")))
+            fullscreen = 0;
+        else if((!(strcmp(argv[i], "-c") && strcmp(argv[i], "--catsize"))) && i != argc - 1) // I don't know boolean order of operations, please cut down on unneeded parenthases
+            if(!strcmp(argv[i+1], "full"))
+                catsize = 1;
+            else
+                catsize = 0;
+        else if(!(strcmp(argv[i], "-nc") && strcmp(argv[i], "--nocursor")))
+            cursor = 0;
+        else if(!(strcmp(argv[i], "-sc") && strcmp(argv[i], "--cursor") && strcmp(argv[i], "--showcursor")))
+            cursor = 1;
+        else if(!(strcmp(argv[i], "-ns") && strcmp(argv[i], "--nosound")))
             sound = 0;
+        else if(!(strcmp(argv[i], "-h") && strcmp(argv[i], "--help"))) {
+            printf("Usage: %s [OPTIONS]\n\
+    -h, --help                    This help message\n\
+    -f, --fullscreen              Enable fullscreen mode (default)\n\
+    -nf, --nofullscreen           Disable fullscreen mode (run in window)\n\
+    -c, --catsize                 Choose size of cat, options are full and small, small is default\n\
+    -nc, --nocursor               Don't show the cursor (default)\n\
+    -sc, --cursor, --showcursor   Show the cursor\n\
+    -ns, --nosound                Don't play sound\n\
+    -hw, -sw                      Use hardware or software SDL surfaces, respectively\n", argv[0]);
+            exit(0);
+        }
     }
 }
 
@@ -260,11 +294,16 @@ init(void) {
     srand( time(NULL) );
 
     SDL_Init( SDL_INIT_EVERYTHING );
-    screen = SDL_SetVideoMode( 0, 0, SCREEN_BPP, SURF_TYPE | SDL_FULLSCREEN );
-    SDL_ShowCursor(0);
+    if (fullscreen)
+        screen = SDL_SetVideoMode( 0, 0, SCREEN_BPP, SURF_TYPE | SDL_FULLSCREEN );
+    else
+        screen = SDL_SetVideoMode( 0, 0, SCREEN_BPP, SURF_TYPE );
+    if(!cursor)
+        SDL_ShowCursor(0);
 
     load_images();
-    stretch_images();
+    if(catsize == 1)
+        stretch_images();
     bgcolor = SDL_MapRGB(screen->format, 0x00, 0x33, 0x66);
     fillsquare(screen, 0, 0, screen->w, screen->h, bgcolor);
 
@@ -280,7 +319,10 @@ init(void) {
     else
         xinerama_add_cats();
 #else
-    add_cat(0, (screen->h - stretch_cat[0]->h) / 2);
+    if(catsize == 1)
+        add_cat(0, (screen->h - stretch_cat[0]->h) / 2);
+    else
+        add_cat((screen->w - cat_img[0]->w) / 2, (screen->h - cat_img[0]->h) / 2);
 #endif /* Xinerama */
 
     /* clear initial input */
@@ -327,12 +369,12 @@ load_images(void) {
 static void
 stretch_images(void) {
     SDL_Rect stretchto;
-    stretchto.w=screen->w;
+    stretchto.w = screen->w;
+    stretchto.h = stretchto.w * cat_img[0]->h / cat_img[0]->w;
 
     SDL_PixelFormat fmt = *(screen->format);
-    for(int i=0;i<=4;i++) {
-        stretchto.h=stretchto.w*cat_img[i]->h/cat_img[i]->w;
-        stretch_cat[i] = SDL_CreateRGBSurface(SDL_SWSURFACE,stretchto.w,stretchto.h,SCREEN_BPP,fmt.Rmask,fmt.Gmask,fmt.Bmask,fmt.Amask);
+    for(int i=0; i<=4; i++) {
+        stretch_cat[i] = SDL_CreateRGBSurface(SURF_TYPE,stretchto.w,stretchto.h,SCREEN_BPP,fmt.Rmask,fmt.Gmask,fmt.Bmask,fmt.Amask);
         SDL_SoftStretch(cat_img[i],NULL,stretch_cat[i],NULL);
     }
 }
@@ -353,10 +395,10 @@ load_image( const char* path ) {
 static void
 load_music(void) {
     music = Mix_LoadMUS("res/nyan.ogg");
-    if (!music)
+    if (!music) {
         music = Mix_LoadMUS("/usr/share/nyancat/nyan.ogg");
-    if (!music)
         printf("Unable to load Ogg file: %s\n", Mix_GetError());
+    }
 }
 
 static void
@@ -444,7 +486,10 @@ xinerama_add_cats(void) {
     XineramaScreenInfo* info = XineramaQueryScreens(dpy, &nn);
 
     for (i = 0; i < nn; ++i)
-        add_cat(0, info[i].y_org + ((info[i].height - stretch_cat[0]->h) / 2));
+        if(catsize == 1)
+            add_cat(0, info[i].y_org + ((info[i].height - stretch_cat[0]->h) / 2));
+        else
+            add_cat(info[i].x_org + ((info[i].width - cat_img[0]->w) / 2), info[i].y_org + ((info[i].height - cat_img[0]->h) / 2));
 
     XFree(info);
     XCloseDisplay(dpy);
