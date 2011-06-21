@@ -369,7 +369,7 @@ load_images(void) {
 static void
 stretch_images(void) {
     SDL_Rect stretchto;
-    stretchto.w = screen->w;
+    stretchto.w = screen->w - screen->w * .1;
     stretchto.h = stretchto.w * cat_img[0]->h / cat_img[0]->w;
 
     SDL_PixelFormat fmt = *(screen->format);
