@@ -65,13 +65,15 @@ static void xinerama_add_cats(void);
 /* Globals */
 static unsigned int         FRAMERATE = 14;
 static unsigned int         SCREEN_BPP = 32;
+static unsigned int         SCREEN_WIDTH = 800;
+static unsigned int         SCREEN_HEIGHT = 600;
 static SDL_Surface*         screen = NULL;
 static SDL_Event            event;
 static int                  running = 1;
 static int                  SURF_TYPE = SDL_HWSURFACE;
 static int                  sound = 1;
-static int                  fullscreen = 1;
-static int                  catsize = 0;
+static int                  fullscreen = 0;
+static int                  catsize = 1;
 static int                  cursor = 0;
 #ifdef XINERAMA
 static Display* dpy;
@@ -247,27 +249,39 @@ handle_args(int argc, char **argv) {
             fullscreen = 1;
         else if(!(strcmp(argv[i], "-nf") && strcmp(argv[i], "--nofullscreen")))
             fullscreen = 0;
-        else if((!(strcmp(argv[i], "-c") && strcmp(argv[i], "--catsize"))) && i != argc - 1) // I don't know boolean order of operations, please cut down on unneeded parenthases
+        else if((!(strcmp(argv[i], "-c") && strcmp(argv[i], "--catsize"))) && i != argc - 1) { // I don't know boolean order of operations, please cut down on unneeded parenthases
             if(!strcmp(argv[i+1], "full"))
                 catsize = 1;
-            else
+            else if(!strcmp(argv[i+1], "small"))
                 catsize = 0;
+            i++;
+        }
+        else if((!strcmp(argv[i], "-r") && strcmp(argv[i], "--resolution")) && i < argc - 2) {
+            int dims[2] = { atoi(argv[i+1]), atoi(argv[i+2]) };
+            if (dims[0] >= 0 && dims[0] < 10000 && dims[1] >= 0 && dims[1] < 5000) {           // Borrowed from PixelUnsticker, changed the variable name
+                SCREEN_WIDTH = dims[0];
+                SCREEN_HEIGHT = dims[1];
+            }
+            else
+                puts("Arguments do not appear to be valid screen sizes. Defaulting.");
+        }
         else if(!(strcmp(argv[i], "-nc") && strcmp(argv[i], "--nocursor")))
             cursor = 0;
         else if(!(strcmp(argv[i], "-sc") && strcmp(argv[i], "--cursor") && strcmp(argv[i], "--showcursor")))
             cursor = 1;
         else if(!(strcmp(argv[i], "-ns") && strcmp(argv[i], "--nosound")))
             sound = 0;
-        else if(!(strcmp(argv[i], "-h") && strcmp(argv[i], "--help"))) {
+        else if(! strcmp(argv[i], "--help")) {
             printf("Usage: %s [OPTIONS]\n\
-    -h, --help                    This help message\n\
-    -f, --fullscreen              Enable fullscreen mode (default)\n\
-    -nf, --nofullscreen           Disable fullscreen mode (run in window)\n\
-    -c, --catsize                 Choose size of cat, options are full and small, small is default\n\
-    -nc, --nocursor               Don't show the cursor (default)\n\
-    -sc, --cursor, --showcursor   Show the cursor\n\
-    -ns, --nosound                Don't play sound\n\
-    -hw, -sw                      Use hardware or software SDL surfaces, respectively\n", argv[0]);
+    -h,  --help                    This help message\n\
+    -f,  --fullscreen              Enable fullscreen mode\n\
+    -nf, --nofullscreen            Disable fullscreen mode (run in window, default)\n\
+    -c,  --catsize                 Choose size of cat, options are full and small, full is default\n\
+    -nc, --nocursor                Don't show the cursor (default)\n\
+    -sc, --cursor, --showcursor    Show the cursor\n\
+    -ns, --nosound                 Don't play sound\n\
+    -r,  --resolution              Make next two arguments the screen resolution to use (0 and 0 for full resolution) (800x600 default)\n\
+    -hw, -sw                       Use hardware or software SDL rendering, respectively, hardware is default\n", argv[0]);
             exit(0);
         }
     }
@@ -294,15 +308,16 @@ init(void) {
 
     SDL_Init( SDL_INIT_EVERYTHING );
     if (fullscreen)
-        screen = SDL_SetVideoMode( 0, 0, SCREEN_BPP, SURF_TYPE | SDL_FULLSCREEN );
+        screen = SDL_SetVideoMode( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, SURF_TYPE | SDL_FULLSCREEN );
     else
-        screen = SDL_SetVideoMode( 0, 0, SCREEN_BPP, SURF_TYPE );
+        screen = SDL_SetVideoMode( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, SURF_TYPE );
     if(!cursor)
         SDL_ShowCursor(0);
 
     load_images();
     if(catsize == 1)
         stretch_images();
+
     bgcolor = SDL_MapRGB(screen->format, 0x00, 0x33, 0x66);
     fillsquare(screen, 0, 0, screen->w, screen->h, bgcolor);
 
@@ -485,10 +500,18 @@ xinerama_add_cats(void) {
     XineramaScreenInfo* info = XineramaQueryScreens(dpy, &nn);
 
     for (i = 0; i < nn; ++i)
-        if(catsize == 1)
-            add_cat(0, info[i].y_org + ((info[i].height - stretch_cat[0]->h) / 2));
-        else
-            add_cat(info[i].x_org + ((info[i].width - cat_img[0]->w) / 2), info[i].y_org + ((info[i].height - cat_img[0]->h) / 2));
+        if(fullscreen) {
+            if(catsize == 1)
+                add_cat(0, info[i].y_org + ((info[i].height - stretch_cat[0]->h) / 2));
+            else
+                add_cat(info[i].x_org + ((info[i].width - cat_img[0]->w) / 2), info[i].y_org + ((info[i].height - cat_img[0]->h) / 2));
+        }
+        else {
+            if(catsize == 1)
+                add_cat(0, (SCREEN_HEIGHT - stretch_cat[0]->h) / 2);
+            else
+                add_cat((SCREEN_WIDTH - cat_img[0]->w) / 2, (SCREEN_HEIGHT - cat_img[0]->h) / 2);
+        }
 
     XFree(info);
     XCloseDisplay(dpy);
