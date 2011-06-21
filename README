@@ -1,9 +1,11 @@
 Usage: nyancat [OPTIONS]
-    -h, --help                    Display help
-    -f, --fullscreen              Enable fullscreen mode (default)
-    -nf, --nofullscreen           Disable fullscreen mode (run in window)
-    -c, --catsize                 Choose size of cat, options are full and small, small is default
-    -nc, --nocursor               Don't show the cursor (default)
-    -sc, --cursor, --showcursor   Show the cursor
-    -ns, --nosound                Don't play sound
-    -hw, -sw                      Use hardware or software SDL surfaces, respectively
+    -h,  --help                    This help message
+    -f,  --fullscreen              Enable fullscreen mode
+    -nf, --nofullscreen            Disable fullscreen mode (run in window, default)
+    -c,  --catsize                 Choose size of cat, options are full and small, full is default
+    -nc, --nocursor                Don't show the cursor (default)
+    -sc, --cursor, --showcursor    Show the cursor
+    -ns, --nosound                 Don't play sound
+    -r,  --resolution              Make next two arguments the screen resolution to use (0 and 0 for full resolution) (800x600 default)
+    -hw, -sw                       Use hardware or software SDL rendering, respectively, hardware is default
+
