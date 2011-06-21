@@ -7,7 +7,6 @@
 /* This program is licensed under the GPLv3 and in support of Free and Open Source              */
 /* Software in general. The full license can be found at http://www.gnu.org/licenses/gpl.html   */
 /* ============================================================================================ */
-
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_mixer.h>
@@ -372,7 +371,7 @@ stretch_images(void) {
     stretchto.w = screen->w - screen->w * .1;
     stretchto.h = stretchto.w * cat_img[0]->h / cat_img[0]->w;
 
-    SDL_PixelFormat fmt = *(screen->format);
+    SDL_PixelFormat fmt = *(cat_img[0]->format);
     for(int i=0; i<=4; i++) {
         stretch_cat[i] = SDL_CreateRGBSurface(SURF_TYPE,stretchto.w,stretchto.h,SCREEN_BPP,fmt.Rmask,fmt.Gmask,fmt.Bmask,fmt.Amask);
         SDL_SoftStretch(cat_img[i],NULL,stretch_cat[i],NULL);
