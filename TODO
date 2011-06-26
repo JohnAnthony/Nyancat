@@ -1,4 +1,6 @@
--- Add command-line args
+-- Fix Xinerama support
+-- Add more command-line args
 -- Add rc file
 -- Add configure script
 -- Separate cat and rainbow into separate draw calls (and image files)
+-- Add man page(?)
