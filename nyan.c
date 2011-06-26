@@ -254,6 +254,8 @@ handle_args(int argc, char **argv) {
                     catsize = 1;
                 else if(!strcmp(argv[i], "small"))
                     catsize = 0;
+                else
+                    printf("Unrecognised scaling option: %s - please select either 'full' or 'small' cat size.");
             }
         }
         else if((!strcmp(argv[i], "-r") && strcmp(argv[i], "--resolution")) && i < argc - 2) {
