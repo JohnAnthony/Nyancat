@@ -255,11 +255,11 @@ handle_args(int argc, char **argv) {
                 else if(!strcmp(argv[i], "small"))
                     catsize = 0;
                 else
-                    printf("Unrecognised scaling option: %s - please select either 'full' or 'small' cat size.");
+                    printf("Unrecognised scaling option: %s - please select either 'full' or 'small' cat size.", argv[i]);
             }
         }
         else if((!strcmp(argv[i], "-r") && strcmp(argv[i], "--resolution")) && i < argc - 2) {
-            int dims[2] = { atoi(argv[i+1]), atoi(argv[i+2]) };
+            int dims[2] = { atoi(argv[++i]), atoi(argv[++i]) };
             if (dims[0] >= 0 && dims[0] < 10000 && dims[1] >= 0 && dims[1] < 5000) {           // Borrowed from PixelUnsticker, changed the variable name
                 SCREEN_WIDTH = dims[0];
                 SCREEN_HEIGHT = dims[1];
