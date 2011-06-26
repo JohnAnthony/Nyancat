@@ -51,12 +51,12 @@ static void handle_args(int argc, char** argv);
 static void handle_input(void);
 static void init(void);
 static void load_images(void);
-static void stretch_images(void);
 static SDL_Surface* load_image(const char* path);
 static void load_music(void);
 static void putpix(SDL_Surface* surf, int x, int y, Uint32 col);
 static void remove_sparkle(sparkle_instance* s);
 static void run(void);
+static void stretch_images(void);
 static void update_sparkles(void);
 #ifdef XINERAMA
 static void xinerama_add_cats(void);
@@ -149,7 +149,6 @@ cleanup(void) {
     SDL_Quit();
 }
 
-
 static void
 clear_screen(void) {
     sparkle_instance *s = sparkles_list;
@@ -170,7 +169,6 @@ clear_screen(void) {
     }
 
 }
-
 
 static void
 draw_cats(unsigned int frame) {
@@ -284,9 +282,9 @@ handle_args(int argc, char **argv) {
     -r,  --resolution              Make next two arguments the screen resolution to use (0 and 0 for full resolution) (800x600 default)\n\
     -hw, -sw                       Use hardware or software SDL rendering, respectively, hardware is default\n", argv[0]);
             exit(0);
+        }
         else
             printf("Unrecognised option: %s", argv[i]);
-        }
     }
 }
 
@@ -383,19 +381,6 @@ load_images(void) {
 
 }
 
-static void
-stretch_images(void) {
-    SDL_Rect stretchto;
-    stretchto.w = screen->w - screen->w * .1;
-    stretchto.h = stretchto.w * cat_img[0]->h / cat_img[0]->w;
-
-    SDL_PixelFormat fmt = *(cat_img[0]->format);
-    for(int i=0; i<=4; i++) {
-        stretch_cat[i] = SDL_CreateRGBSurface(SURF_TYPE,stretchto.w,stretchto.h,SCREEN_BPP,fmt.Rmask,fmt.Gmask,fmt.Bmask,fmt.Amask);
-        SDL_SoftStretch(cat_img[i],NULL,stretch_cat[i],NULL);
-    }
-}
-
 static SDL_Surface*
 load_image( const char* path ) {
     SDL_Surface* loadedImage = NULL;
@@ -468,7 +453,18 @@ run(void) {
     }
 }
 
+static void
+stretch_images(void) {
+    SDL_Rect stretchto;
+    stretchto.w = screen->w - screen->w * .1;
+    stretchto.h = stretchto.w * cat_img[0]->h / cat_img[0]->w;
 
+    SDL_PixelFormat fmt = *(cat_img[0]->format);
+    for(int i=0; i<=4; i++) {
+        stretch_cat[i] = SDL_CreateRGBSurface(SURF_TYPE,stretchto.w,stretchto.h,SCREEN_BPP,fmt.Rmask,fmt.Gmask,fmt.Bmask,fmt.Amask);
+        SDL_SoftStretch(cat_img[i],NULL,stretch_cat[i],NULL);
+    }
+}
 
 static void
 update_sparkles(void) {
