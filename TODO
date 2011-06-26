@@ -6,3 +6,6 @@
 -- Add man page(?)
 
 -- Fullscreen resolution autodetect broken by most recent update
+-> Fixed this temporarily but CPU usage is still proving very high/cat scaling is a bit off for wide monitors
+-> Defaulting to the small cat until I can re-implement Xinerama support and fix scaling issues on wide setups
+                                                                        -- Johnson

@@ -73,8 +73,8 @@ static SDL_Event            event;
 static int                  running = 1;
 static int                  SURF_TYPE = SDL_HWSURFACE;
 static int                  sound = 1;
-static int                  fullscreen = 0;
-static int                  catsize = 1;
+static int                  fullscreen = 1;
+static int                  catsize = 0;
 static int                  cursor = 0;
 #ifdef XINERAMA
 static Display* dpy;
@@ -248,7 +248,7 @@ handle_args(int argc, char **argv) {
             fullscreen = 1;
         else if(!(strcmp(argv[i], "-nf") || !strcmp(argv[i], "--nofullscreen")))
             fullscreen = 0;
-        else if(!strcmp(argv[i], "-c") || !strcmp(argv[i], "--catsize")) { // I don't know boolean order of operations, please cut down on unneeded parenthases
+        else if(!strcmp(argv[i], "-c") || !strcmp(argv[i], "--catsize")) {
             if (++i < argc) {
                 if(!strcmp(argv[i], "full"))
                     catsize = 1;
@@ -299,7 +299,7 @@ init(void) {
 
     SDL_Init( SDL_INIT_EVERYTHING );
     if (fullscreen)
-        screen = SDL_SetVideoMode( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, SURF_TYPE | SDL_FULLSCREEN );
+        screen = SDL_SetVideoMode( 0, 0, SCREEN_BPP, SURF_TYPE | SDL_FULLSCREEN );
     else
         screen = SDL_SetVideoMode( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, SURF_TYPE );
     if(!cursor)
