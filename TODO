@@ -9,6 +9,3 @@
 -> Fixed this temporarily but CPU usage is still proving very high/cat scaling is a bit off for wide monitors
 -> Defaulting to the small cat until I can re-implement Xinerama support and fix scaling issues on wide setups
 ->                                                                      -- Johnson
-
--- Massive duplication of effort in differentiating logic for cat_img and stretched_cat
--> This can be circumvented by including a pointer in the cat struct to its associated set of images

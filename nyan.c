@@ -26,7 +26,7 @@ typedef struct {
 typedef struct cat_instance cat_instance;
 struct cat_instance {
     coords loc;
-    cat_instance* next;
+    cat_instance *next;
 };
 
 typedef struct sparkle_instance sparkle_instance;
@@ -35,7 +35,7 @@ struct sparkle_instance {
     int frame_mov;
     unsigned int layer;
     coords loc;
-    sparkle_instance* next;
+    sparkle_instance *next;
 };
 
 /* Predecs */
@@ -86,6 +86,7 @@ static Mix_Music*           music;
 static SDL_Surface*         cat_img[5];
 static SDL_Surface*         sparkle_img[5];
 static SDL_Surface*         stretch_cat[5];
+static SDL_Surface**        image_set = sparkle_img;
 static sparkle_instance*    sparkles_list = NULL;
 static Uint32               bgcolor;
 
@@ -157,10 +158,7 @@ clear_screen(void) {
 
     while (c) {
         /* This is bad. These magic numbers are to make up for uneven image sizes */
-        if(catsize == 1)
-            fillsquare(screen, c->loc.x, c->loc.y - (curr_frame < 2 ? 0 : 5), stretch_cat[curr_frame]->w + 6, stretch_cat[curr_frame]->h + 5, bgcolor);
-        else
-            fillsquare(screen, c->loc.x, c->loc.y - (curr_frame < 2 ? 0 : 5), cat_img[curr_frame]->w + 6, cat_img[curr_frame]->h + 5, bgcolor);
+        fillsquare(screen, c->loc.x, c->loc.y - (curr_frame < 2 ? 0 : 5), image_set[curr_frame]->w + 6, image_set[curr_frame]->h + 5, bgcolor);
         c = c->next;
     }
 
@@ -182,10 +180,7 @@ draw_cats(unsigned int frame) {
 
         if(frame < 2)
             pos.y -= 5;
-        if(catsize == 1)
-            SDL_BlitSurface( stretch_cat[frame], NULL, screen, &pos );
-        else
-            SDL_BlitSurface( cat_img[frame], NULL, screen, &pos );
+        SDL_BlitSurface( image_set[frame], NULL, screen, &pos );
         c = c->next;
     }
 }
@@ -317,6 +312,12 @@ init(void) {
         Mix_PlayMusic(music, 0);
     }
 
+    /* Choose our image set */
+    if (catsize == 1)
+        image_set = stretch_cat;
+    else
+        image_set = cat_img;
+
 /* Ugly */
 #ifdef XINERAMA
     if (!(dpy = XOpenDisplay(NULL)))
@@ -329,7 +330,7 @@ init(void) {
     }
 #else
     if(catsize == 1)
-        add_cat(0, (screen->h - stretch_cat[0]->h) / 2);
+        add_cat(0, (screen->h - image_set[0]->h) / 2);
     else {
         if(catsize == 1)
             stretch_images();
@@ -534,18 +535,10 @@ xinerama_add_cats(void) {
     XineramaScreenInfo* info = XineramaQueryScreens(dpy, &nn);
 
     for (i = 0; i < nn; ++i)
-        if(fullscreen) {
-            if(catsize == 1)
-                add_cat(info[i].x_org + ((info[i].width - stretch_cat[0]->w) / 2), info[i].y_org + ((info[i].height - stretch_cat[0]->h) / 2));
-            else
-                add_cat(info[i].x_org + ((info[i].width - cat_img[0]->w) / 2), info[i].y_org + ((info[i].height - cat_img[0]->h) / 2));
-        }
-        else {
-            if(catsize == 1)
-                add_cat(0, (SCREEN_HEIGHT - stretch_cat[0]->h) / 2);
-            else
-                add_cat((SCREEN_WIDTH - cat_img[0]->w) / 2, (SCREEN_HEIGHT - cat_img[0]->h) / 2);
-        }
+        if(fullscreen)
+            add_cat(info[i].x_org + ((info[i].width - image_set[0]->w) / 2), info[i].y_org + ((info[i].height - image_set[0]->h) / 2));
+        else
+            add_cat((SCREEN_WIDTH - image_set[0]->w) / 2, (SCREEN_HEIGHT - image_set[0]->h) / 2);
 
     XFree(info);
 }
