@@ -58,6 +58,7 @@ static void remove_sparkle(sparkle_instance* s);
 static void run(void);
 static void stretch_images(void);
 static void update_sparkles(void);
+static void usage(char* exname);
 #ifdef XINERAMA
 static void xinerama_add_cats(void);
 #endif /* XINERAMA */
@@ -243,11 +244,11 @@ handle_args(int argc, char **argv) {
             SURF_TYPE = SDL_HWSURFACE;
         else if (!strcmp(argv[i], "-sw"))
             SURF_TYPE = SDL_SWSURFACE;
-        else if (!(strcmp(argv[i], "-f") || !strcmp(argv[i], "--fullscreen")))
+        else if (!strcmp(argv[i], "-f") || !strcmp(argv[i], "--fullscreen"))
             fullscreen = 1;
         else if(!(strcmp(argv[i], "-nf") || !strcmp(argv[i], "--nofullscreen")))
             fullscreen = 0;
-        else if((!(strcmp(argv[i], "-c") || !strcmp(argv[i], "--catsize"))) && i != argc - 1) { // I don't know boolean order of operations, please cut down on unneeded parenthases
+        else if(!strcmp(argv[i], "-c") || !strcmp(argv[i], "--catsize")) { // I don't know boolean order of operations, please cut down on unneeded parenthases
             if (++i < argc) {
                 if(!strcmp(argv[i], "full"))
                     catsize = 1;
@@ -264,25 +265,14 @@ handle_args(int argc, char **argv) {
             else
                 puts("Arguments do not appear to be valid screen sizes. Defaulting.");
         }
-        else if(!(strcmp(argv[i], "-nc") || !strcmp(argv[i], "--nocursor")))
+        else if(!strcmp(argv[i], "-nc") || !strcmp(argv[i], "--nocursor"))
             cursor = 0;
-        else if(!(strcmp(argv[i], "-sc") || !strcmp(argv[i], "--cursor") || !strcmp(argv[i], "--showcursor")))
+        else if(!strcmp(argv[i], "-sc") || !strcmp(argv[i], "--cursor") || !strcmp(argv[i], "--showcursor"))
             cursor = 1;
-        else if(!(strcmp(argv[i], "-ns") || !strcmp(argv[i], "--nosound")))
+        else if(!strcmp(argv[i], "-ns") || !strcmp(argv[i], "--nosound"))
             sound = 0;
-        else if(!strcmp(argc[i], "-h") || !strcmp(argv[i], "--help")) {
-            printf("Usage: %s [OPTIONS]\n\
-    -h,  --help                    This help message\n\
-    -f,  --fullscreen              Enable fullscreen mode\n\
-    -nf, --nofullscreen            Disable fullscreen mode (run in window, default)\n\
-    -c,  --catsize                 Choose size of cat, options are full and small, full is default\n\
-    -nc, --nocursor                Don't show the cursor (default)\n\
-    -sc, --cursor, --showcursor    Show the cursor\n\
-    -ns, --nosound                 Don't play sound\n\
-    -r,  --resolution              Make next two arguments the screen resolution to use (0 and 0 for full resolution) (800x600 default)\n\
-    -hw, -sw                       Use hardware or software SDL rendering, respectively, hardware is default\n", argv[0]);
-            exit(0);
-        }
+        else if(!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help")) 
+            usage(argv[0]);
         else
             printf("Unrecognised option: %s\n", argv[i]);
     }
@@ -491,6 +481,22 @@ update_sparkles(void) {
         s = next;
     }
 }
+
+static void
+usage(char* exname) {
+    printf("Usage: %s [OPTIONS]\n\
+    -h,  --help                    This help message\n\
+    -f,  --fullscreen              Enable fullscreen mode\n\
+    -nf, --nofullscreen            Disable fullscreen mode (run in window, default)\n\
+    -c,  --catsize                 Choose size of cat, options are full and small, full is default\n\
+    -nc, --nocursor                Don't show the cursor (default)\n\
+    -sc, --cursor, --showcursor    Show the cursor\n\
+    -ns, --nosound                 Don't play sound\n\
+    -r,  --resolution              Make next two arguments the screen resolution to use (0 and 0 for full resolution) (800x600 default)\n\
+    -hw, -sw                       Use hardware or software SDL rendering, respectively, hardware is default\n", exname);
+    exit(0);
+}
+
 
 #ifdef XINERAMA
 static void
