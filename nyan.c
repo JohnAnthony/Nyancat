@@ -462,8 +462,6 @@ stretch_images(void) {
     int i, nn;
     XineramaScreenInfo* info = XineramaQueryScreens(dpy, &nn);
 
-    printf("Screens: %d\n", nn);
-
     for (i = 0; i < nn; ++i) {
         if(!stretchto.w || info[i].width < stretchto.w)
             stretchto.w = info[i].width;
