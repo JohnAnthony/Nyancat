@@ -250,11 +250,12 @@ handle_args(int argc, char **argv) {
         else if(!(strcmp(argv[i], "-nf") && strcmp(argv[i], "--nofullscreen")))
             fullscreen = 0;
         else if((!(strcmp(argv[i], "-c") && strcmp(argv[i], "--catsize"))) && i != argc - 1) { // I don't know boolean order of operations, please cut down on unneeded parenthases
-            if(!strcmp(argv[i+1], "full"))
-                catsize = 1;
-            else if(!strcmp(argv[i+1], "small"))
-                catsize = 0;
-            i++;
+            if (++i < argc) {
+                if(!strcmp(argv[i], "full"))
+                    catsize = 1;
+                else if(!strcmp(argv[i], "small"))
+                    catsize = 0;
+            }
         }
         else if((!strcmp(argv[i], "-r") && strcmp(argv[i], "--resolution")) && i < argc - 2) {
             int dims[2] = { atoi(argv[i+1]), atoi(argv[i+2]) };
@@ -283,6 +284,8 @@ handle_args(int argc, char **argv) {
     -r,  --resolution              Make next two arguments the screen resolution to use (0 and 0 for full resolution) (800x600 default)\n\
     -hw, -sw                       Use hardware or software SDL rendering, respectively, hardware is default\n", argv[0]);
             exit(0);
+        else
+            printf("Unrecognised option: %s", argv[i]);
         }
     }
 }
