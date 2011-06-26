@@ -514,14 +514,14 @@ static void
 usage(char* exname) {
     printf("Usage: %s [OPTIONS]\n\
     -h,  --help                    This help message\n\
-    -f,  --fullscreen              Enable fullscreen mode\n\
-    -nf, --nofullscreen            Disable fullscreen mode (run in window, default)\n\
-    -c,  --catsize                 Choose size of cat, options are full and small, full is default\n\
+    -f,  --fullscreen              Enable fullscreen mode (default)\n\
+    -nf, --nofullscreen            Disable fullscreen mode\n\
+    -c,  --catsize                 Choose size of cat, options are full and small. Small is default\n\
     -nc, --nocursor                Don't show the cursor (default)\n\
     -sc, --cursor, --showcursor    Show the cursor\n\
     -ns, --nosound                 Don't play sound\n\
     -r,  --resolution              Make next two arguments the screen resolution to use (0 and 0 for full resolution) (800x600 default)\n\
-    -hw, -sw                       Use hardware or software SDL rendering, respectively, hardware is default\n", exname);
+    -hw, -sw                       Use hardware or software SDL rendering, respectively. Hardware is default\n", exname);
     exit(0);
 }
 
