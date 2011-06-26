@@ -255,7 +255,7 @@ handle_args(int argc, char **argv) {
                 else if(!strcmp(argv[i], "small"))
                     catsize = 0;
                 else
-                    printf("Unrecognised scaling option: %s - please select either 'full' or 'small' cat size.", argv[i]);
+                    printf("Unrecognised scaling option: %s - please select either 'full' or 'small' cat size.\n", argv[i]);
             }
         }
         else if((!strcmp(argv[i], "-r") && strcmp(argv[i], "--resolution")) && i < argc - 2) {
@@ -308,9 +308,6 @@ init(void) {
         SDL_ShowCursor(0);
 
     load_images();
-    if(catsize == 1)
-        stretch_images();
-
     bgcolor = SDL_MapRGB(screen->format, 0x00, 0x33, 0x66);
     fillsquare(screen, 0, 0, screen->w, screen->h, bgcolor);
 
@@ -320,16 +317,24 @@ init(void) {
         Mix_PlayMusic(music, 0);
     }
 
+/* Ugly */
 #ifdef XINERAMA
     if (!(dpy = XOpenDisplay(NULL)))
         puts("Failed to open Xinerama display information.");
-    else
+    else{
+        if(catsize == 1)
+            stretch_images();
         xinerama_add_cats();
+        XCloseDisplay(dpy);
+    }
 #else
     if(catsize == 1)
         add_cat(0, (screen->h - stretch_cat[0]->h) / 2);
-    else
+    else {
+        if(catsize == 1)
+            stretch_images();
         add_cat((screen->w - cat_img[0]->w) / 2, (screen->h - cat_img[0]->h) / 2);
+    }
 #endif /* Xinerama */
 
     /* clear initial input */
@@ -448,14 +453,36 @@ run(void) {
 static void
 stretch_images(void) {
     SDL_Rect stretchto;
-    stretchto.w = screen->w - screen->w * .1;
-    stretchto.h = stretchto.w * cat_img[0]->h / cat_img[0]->w;
+    stretchto.w = 0;
+    stretchto.h = 0;
+
+    /*  Just use the x co-ordinate for scaling for now. This does, however, need to be changed to accomodate taller resolutions */
+#ifdef XINERAMA
+    int i, nn;
+    XineramaScreenInfo* info = XineramaQueryScreens(dpy, &nn);
+
+    printf("Screens: %d\n", nn);
+
+    for (i = 0; i < nn; ++i) {
+        if(!stretchto.w || info[i].width < stretchto.w)
+            stretchto.w = info[i].width;
+    }
+
+    XFree(info);
+#endif /* XINERAMA */
+    if (!stretchto.w)
+        stretchto.w = screen->w;
+
+    /* Handle a slight scaling down */
+    stretchto.w *= 0.9;
+    stretchto.h = stretchto.w * cat_img[0]->h / cat_img[0]->w;      /* Scale h to w */
 
     SDL_PixelFormat fmt = *(cat_img[0]->format);
     for(int i=0; i<=4; i++) {
         stretch_cat[i] = SDL_CreateRGBSurface(SURF_TYPE,stretchto.w,stretchto.h,SCREEN_BPP,fmt.Rmask,fmt.Gmask,fmt.Bmask,fmt.Amask);
         SDL_SoftStretch(cat_img[i],NULL,stretch_cat[i],NULL);
     }
+
 }
 
 static void
@@ -509,7 +536,7 @@ xinerama_add_cats(void) {
     for (i = 0; i < nn; ++i)
         if(fullscreen) {
             if(catsize == 1)
-                add_cat(0, info[i].y_org + ((info[i].height - stretch_cat[0]->h) / 2));
+                add_cat(info[i].x_org + ((info[i].width - stretch_cat[0]->w) / 2), info[i].y_org + ((info[i].height - stretch_cat[0]->h) / 2));
             else
                 add_cat(info[i].x_org + ((info[i].width - cat_img[0]->w) / 2), info[i].y_org + ((info[i].height - cat_img[0]->h) / 2));
         }
@@ -521,7 +548,6 @@ xinerama_add_cats(void) {
         }
 
     XFree(info);
-    XCloseDisplay(dpy);
 }
 #endif /* XINERAMA */
 
