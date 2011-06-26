@@ -9,3 +9,6 @@
 -> Fixed this temporarily but CPU usage is still proving very high/cat scaling is a bit off for wide monitors
 -> Defaulting to the small cat until I can re-implement Xinerama support and fix scaling issues on wide setups
 ->                                                                      -- Johnson
+
+-- Increase efficiency of clear_screen() by not blanking the area of sparkles behind a cat
+-- Add support for vary long displays ( stretch_cat() function )
