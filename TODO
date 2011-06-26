@@ -4,3 +4,5 @@
 -- Add configure script
 -- Separate cat and rainbow into separate draw calls (and image files)
 -- Add man page(?)
+
+-- Fullscreen resolution autodetect broken by most recent update
