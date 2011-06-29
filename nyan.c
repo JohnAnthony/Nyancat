@@ -243,6 +243,14 @@ handle_args(int argc, char **argv) {
             fullscreen = 1;
         else if(!(strcmp(argv[i], "-nf") || !strcmp(argv[i], "--nofullscreen")))
             fullscreen = 0;
+        else if(!strcmp(argv[i], "-nc") || !strcmp(argv[i], "--nocursor"))
+            cursor = 0;
+        else if(!strcmp(argv[i], "-sc") || !strcmp(argv[i], "--cursor") || !strcmp(argv[i], "--showcursor"))
+            cursor = 1;
+        else if(!strcmp(argv[i], "-ns") || !strcmp(argv[i], "--nosound"))
+            sound = 0;
+        else if(!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help")) 
+            usage(argv[0]);
         else if(!strcmp(argv[i], "-c") || !strcmp(argv[i], "--catsize")) {
             if (++i < argc) {
                 if(!strcmp(argv[i], "full"))
@@ -262,14 +270,6 @@ handle_args(int argc, char **argv) {
             else
                 puts("Arguments do not appear to be valid screen sizes. Defaulting.");
         }
-        else if(!strcmp(argv[i], "-nc") || !strcmp(argv[i], "--nocursor"))
-            cursor = 0;
-        else if(!strcmp(argv[i], "-sc") || !strcmp(argv[i], "--cursor") || !strcmp(argv[i], "--showcursor"))
-            cursor = 1;
-        else if(!strcmp(argv[i], "-ns") || !strcmp(argv[i], "--nosound"))
-            sound = 0;
-        else if(!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help")) 
-            usage(argv[0]);
         else
             printf("Unrecognised option: %s\n", argv[i]);
     }
