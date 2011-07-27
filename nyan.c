@@ -395,10 +395,10 @@ load_image( const char* path ) {
 static void
 load_music(void) {
     music = Mix_LoadMUS("res/nyan.ogg");
-    if (!music) {
+    if (!music)
         music = Mix_LoadMUS("/usr/share/nyancat/nyan.ogg");
+    if (!music)
         printf("Unable to load Ogg file: %s\n", Mix_GetError());
-    }
 }
 
 static void
