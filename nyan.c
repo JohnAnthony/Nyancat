@@ -428,8 +428,7 @@ static void
 run(void) {
     unsigned int last_draw, draw_time;
 
-    while( running )
-    {
+    while( running ) {
         last_draw = SDL_GetTicks();
 
         clear_screen();
