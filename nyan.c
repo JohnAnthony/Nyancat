@@ -208,7 +208,7 @@ static void
 errout (char *str) {
     if (str)
         puts(str);
-    exit(1);
+    exit(-1);
 }
 
 static void
