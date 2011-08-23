@@ -45,6 +45,7 @@ static void cleanup(void);
 static void clear_screen(void);
 static void draw_cats(unsigned int frame);
 static void draw_sparkles(void);
+static void* ec_malloc(unsigned int size);
 static void errout(char *str);
 static void fillsquare(SDL_Surface* surf, int x, int y, int w, int h, Uint32 col);
 static void handle_args(int argc, char** argv);
@@ -95,9 +96,7 @@ add_sparkle(void) {
     sparkle_instance* s = sparkles_list;
     sparkle_instance* new;
 
-    new = malloc(sizeof(sparkle_instance));
-    if(!new)
-        errout("Could not allocate new sparkle instance memory in add_sparkle.");
+    new = ec_malloc(sizeof(sparkle_instance));
 
     new->loc.x = screen->w + 80;
     new->loc.y = (rand() % (screen->h + sparkle_img[0]->h)) - sparkle_img[0]->h;
@@ -123,9 +122,7 @@ add_cat(unsigned int x, unsigned int y) {
     cat_instance* c = cat_list;
     cat_instance* new;
 
-    new = malloc(sizeof(cat_instance));
-    if(!new)
-        errout("Could not allocate new cat instance memory in add_cat.");
+    new = ec_malloc(sizeof(cat_instance));
 
     new->loc.x = x;
     new->loc.y = y;
@@ -196,6 +193,15 @@ draw_sparkles() {
         SDL_BlitSurface( sparkle_img[s->frame], NULL, screen, &pos );
         s = s->next;
     }
+}
+
+static void*
+ec_malloc(unsigned int size) {
+    void *ptr;
+    ptr = malloc(size);
+    if (!ptr)
+        errout("In ec_malloc -- unable to allocate memory.");
+    return ptr;
 }
 
 static void
