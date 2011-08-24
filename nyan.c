@@ -18,6 +18,8 @@
 #include <X11/extensions/Xinerama.h>
 #endif /* XINERAMA */
 
+#define ANIM_FRAMES 5
+
 /* Type definitions */
 typedef struct {
     int x, y;
@@ -65,32 +67,52 @@ static void xinerama_add_cats(void);
 #endif /* XINERAMA */
 
 /* Globals */
-static unsigned int         FRAMERATE = 14;
-static unsigned int         SCREEN_BPP = 32;
-static unsigned int         SCREEN_WIDTH = 800;
-static unsigned int         SCREEN_HEIGHT = 600;
-static SDL_Surface*         screen = NULL;
-static SDL_Event            event;
-static int                  running = 1;
-static int                  SURF_TYPE = SDL_HWSURFACE;
-static int                  sound = 1;
-static int                  fullscreen = 1;
-static int                  catsize = 0;
-static int                  cursor = 0;
+static unsigned int                 FRAMERATE = 14;
+static unsigned int                 SCREEN_BPP = 32;
+static unsigned int                 SCREEN_WIDTH = 800;
+static unsigned int                 SCREEN_HEIGHT = 600;
+static SDL_Surface*                 screen = NULL;
+static SDL_Event                    event;
+static int                          running = 1;
+static int                          SURF_TYPE = SDL_HWSURFACE;
+static int                          sound = 1;
+static int                          fullscreen = 1;
+static int                          catsize = 0;
+static int                          cursor = 0;
 #ifdef XINERAMA
-static Display* dpy;
+static Display*                     dpy;
 #endif /* XINERAMA */
-static cat_instance*        cat_list = NULL;
-static int                  curr_frame = 0;
-static int                  sparkle_spawn_counter = 0;
-static Mix_Music*           music;
-static SDL_Surface*         cat_img[5];
-static SDL_Surface*         sparkle_img[5];
-static SDL_Surface*         stretch_cat[5];
-static SDL_Surface**        image_set = sparkle_img;
-static sparkle_instance*    sparkles_list = NULL;
-static Uint32               bgcolor;
-
+static cat_instance*                cat_list = NULL;
+static int                          curr_frame = 0;
+static int                          sparkle_spawn_counter = 0;
+static Mix_Music*                   music;
+static SDL_Surface*                 cat_img[ANIM_FRAMES];
+static SDL_Surface*                 sparkle_img[ANIM_FRAMES];
+static SDL_Surface*                 stretch_cat[ANIM_FRAMES];
+static SDL_Surface**                image_set = sparkle_img;
+static sparkle_instance*            sparkles_list = NULL;
+static Uint32                       bgcolor;
+static char *catimgpaths[] = {      "res/frame00.png",
+                                    "res/frame01.png",
+                                    "res/frame02.png",
+                                    "res/frame03.png",
+                                    "res/frame04.png"};
+static char *altcatimgpaths[] = {   "/usr/share/nyancat/frame00.png",
+                                    "/usr/share/nyancat/frame01.png",
+                                    "/usr/share/nyancat/frame02.png",
+                                    "/usr/share/nyancat/frame03.png",
+                                    "/usr/share/nyancat/frame04.png"};
+static char *sparklepaths[] = {     "res/sparkle0.png",
+                                    "res/sparkle1.png",
+                                    "res/sparkle2.png",
+                                    "res/sparkle3.png",
+                                    "res/sparkle4.png"};
+static char *altsparklepaths[] = {  "/usr/share/nyancat/sparkle0.png",
+                                    "/usr/share/nyancat/sparkle1.png",
+                                    "/usr/share/nyancat/sparkle2.png",
+                                    "/usr/share/nyancat/sparkle3.png",
+                                    "/usr/share/nyancat/sparkle4.png"};
+/* Function definitions */
 static void
 add_sparkle(void) {
     sparkle_instance* s = sparkles_list;
@@ -354,35 +376,28 @@ init(void) {
 
 static void
 load_images(void) {
-    /* This obviously needs work */
-    /* Needs to be replaced with a loop */
-    cat_img[0] = load_image("res/frame00.png");
-    if(!cat_img[0]) {
-        cat_img[0] = load_image("/usr/share/nyancat/frame00.png");
-        cat_img[1] = load_image("/usr/share/nyancat/frame01.png");
-        cat_img[2] = load_image("/usr/share/nyancat/frame02.png");
-        cat_img[3] = load_image("/usr/share/nyancat/frame03.png");
-        cat_img[4] = load_image("/usr/share/nyancat/frame04.png");
+    int i;
 
-        sparkle_img[0] = load_image("/usr/share/nyancat/sparkle0.png");
-        sparkle_img[1] = load_image("/usr/share/nyancat/sparkle1.png");
-        sparkle_img[2] = load_image("/usr/share/nyancat/sparkle2.png");
-        sparkle_img[3] = load_image("/usr/share/nyancat/sparkle3.png");
-        sparkle_img[4] = load_image("/usr/share/nyancat/sparkle4.png");
+    /*  catimgpaths     = Default cat images
+     *  altcatimgpaths  = Alternative cat images
+     *  sparklepaths    = Default sparkle image
+     *  altsparklepaths = Alternative sparkle images
+     */
+
+    for (i = 0; i < ANIM_FRAMES; ++i) {
+        /* Cat images */
+        cat_img[i] = load_image(catimgpaths[i]);
+        if (!cat_img[i])
+            cat_img[i] = load_image(altcatimgpaths[i]);
+        if (!cat_img[i])
+            errout("Error loading cat images!");
+        /* Sparkle images  */
+        sparkle_img[i] = load_image(sparklepaths[i]);
+        if (!sparkle_img[i])
+            sparkle_img[i] = load_image(altsparklepaths[i]);
+        if (!sparkle_img[i])
+            errout("Error loading sparkle images!");
     }
-    else {
-        cat_img[1] = load_image("res/frame01.png");
-        cat_img[2] = load_image("res/frame02.png");
-        cat_img[3] = load_image("res/frame03.png");
-        cat_img[4] = load_image("res/frame04.png");
-
-        sparkle_img[0] = load_image("res/sparkle0.png");
-        sparkle_img[1] = load_image("res/sparkle1.png");
-        sparkle_img[2] = load_image("res/sparkle2.png");
-        sparkle_img[3] = load_image("res/sparkle3.png");
-        sparkle_img[4] = load_image("res/sparkle4.png");
-    }
-
 }
 
 static SDL_Surface*
@@ -529,7 +544,6 @@ usage(char* exname) {
     -hw, -sw                       Use hardware or software SDL rendering, respectively. Hardware is default\n", exname);
     exit(0);
 }
-
 
 #ifdef XINERAMA
 static void
