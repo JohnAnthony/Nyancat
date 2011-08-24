@@ -385,18 +385,21 @@ load_images(void) {
      */
 
     for (i = 0; i < ANIM_FRAMES; ++i) {
+
         /* Cat images */
         cat_img[i] = load_image(catimgpaths[i]);
         if (!cat_img[i])
             cat_img[i] = load_image(altcatimgpaths[i]);
         if (!cat_img[i])
             errout("Error loading cat images!");
+
         /* Sparkle images  */
         sparkle_img[i] = load_image(sparklepaths[i]);
         if (!sparkle_img[i])
             sparkle_img[i] = load_image(altsparklepaths[i]);
         if (!sparkle_img[i])
             errout("Error loading sparkle images!");
+
     }
 }
 
