@@ -92,26 +92,7 @@ static SDL_Surface*                 stretch_cat[ANIM_FRAMES];
 static SDL_Surface**                image_set = sparkle_img;
 static sparkle_instance*            sparkles_list = NULL;
 static Uint32                       bgcolor;
-static char *catimgpaths[] = {      "res/frame00.png",
-                                    "res/frame01.png",
-                                    "res/frame02.png",
-                                    "res/frame03.png",
-                                    "res/frame04.png"};
-static char *altcatimgpaths[] = {   "/usr/share/nyancat/frame00.png",
-                                    "/usr/share/nyancat/frame01.png",
-                                    "/usr/share/nyancat/frame02.png",
-                                    "/usr/share/nyancat/frame03.png",
-                                    "/usr/share/nyancat/frame04.png"};
-static char *sparklepaths[] = {     "res/sparkle0.png",
-                                    "res/sparkle1.png",
-                                    "res/sparkle2.png",
-                                    "res/sparkle3.png",
-                                    "res/sparkle4.png"};
-static char *altsparklepaths[] = {  "/usr/share/nyancat/sparkle0.png",
-                                    "/usr/share/nyancat/sparkle1.png",
-                                    "/usr/share/nyancat/sparkle2.png",
-                                    "/usr/share/nyancat/sparkle3.png",
-                                    "/usr/share/nyancat/sparkle4.png"};
+
 /* Function definitions */
 static void
 add_sparkle(void) {
@@ -378,12 +359,36 @@ static void
 load_images(void) {
     int i;
 
-    /*  catimgpaths     = Default cat images
-     *  altcatimgpaths  = Alternative cat images
-     *  sparklepaths    = Default sparkle image
-     *  altsparklepaths = Alternative sparkle images
-     */
+    /* Local cat */
+    static char *catimgpaths[] = {
+            "res/frame00.png",
+            "res/frame01.png",
+            "res/frame02.png",
+            "res/frame03.png",
+            "res/frame04.png"};
+    /* Installed cat */
+    static char *altcatimgpaths[] = {
+            "/usr/share/nyancat/frame00.png",
+            "/usr/share/nyancat/frame01.png",
+            "/usr/share/nyancat/frame02.png",
+            "/usr/share/nyancat/frame03.png",
+            "/usr/share/nyancat/frame04.png"};
+    /* Local sparkles */
+    static char *sparklepaths[] = {
+            "res/sparkle0.png",
+            "res/sparkle1.png",
+            "res/sparkle2.png",
+            "res/sparkle3.png",
+            "res/sparkle4.png"};
+    /* Installed sparkles */
+    static char *altsparklepaths[] = {
+            "/usr/share/nyancat/sparkle0.png",
+            "/usr/share/nyancat/sparkle1.png",
+            "/usr/share/nyancat/sparkle2.png",
+            "/usr/share/nyancat/sparkle3.png",
+            "/usr/share/nyancat/sparkle4.png"};
 
+    /* Loading logic */
     for (i = 0; i < ANIM_FRAMES; ++i) {
 
         /* Cat images */
