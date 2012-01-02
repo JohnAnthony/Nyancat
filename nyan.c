@@ -341,8 +341,6 @@ init(void) {
     if(catsize == 1)
         add_cat(0, (screen->h - image_set[0]->h) / 2);
     else {
-        if(catsize == 1)
-            stretch_images();
         add_cat((screen->w - cat_img[0]->w) / 2, (screen->h - cat_img[0]->h) / 2);
     }
 #endif /* Xinerama */
