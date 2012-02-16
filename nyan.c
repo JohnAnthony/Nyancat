@@ -158,7 +158,8 @@ clear_screen(void) {
 
     while (c) {
         /* This is bad. These magic numbers are to make up for uneven image sizes */
-        fillsquare(screen, c->loc.x, c->loc.y - (curr_frame < 2 ? 0 : 5), image_set[curr_frame]->w + 6, image_set[curr_frame]->h + 5, bgcolor);
+        fillsquare(screen, c->loc.x, c->loc.y - (curr_frame < 2 ? 0 : 5),
+          image_set[curr_frame]->w + 6, image_set[curr_frame]->h + 5, bgcolor);
         c = c->next;
     }
 
@@ -483,7 +484,8 @@ stretch_images(void) {
     stretchto.w = 0;
     stretchto.h = 0;
 
-    /*  Just use the x co-ordinate for scaling for now. This does, however, need to be changed to accomodate taller resolutions */
+    /*  Just use the x co-ordinate for scaling for now. This does, however,
+        need to be changed to accomodate taller resolutions */
 #ifdef XINERAMA
     int i, nn;
     XineramaScreenInfo* info = XineramaQueryScreens(dpy, &nn);
@@ -500,11 +502,12 @@ stretch_images(void) {
 
     /* Handle a slight scaling down */
     stretchto.w *= 0.9;
-    stretchto.h = stretchto.w * cat_img[0]->h / cat_img[0]->w;      /* Scale h to w */
+    stretchto.h = stretchto.w * cat_img[0]->h / cat_img[0]->w;
 
     SDL_PixelFormat fmt = *(cat_img[0]->format);
     for(int i=0; i<=4; i++) {
-        stretch_cat[i] = SDL_CreateRGBSurface(SURF_TYPE,stretchto.w,stretchto.h,SCREEN_BPP,fmt.Rmask,fmt.Gmask,fmt.Bmask,fmt.Amask);
+        stretch_cat[i] = SDL_CreateRGBSurface(SURF_TYPE, stretchto.w,
+            stretchto.h,SCREEN_BPP,fmt.Rmask,fmt.Gmask,fmt.Bmask,fmt.Amask);
         SDL_SoftStretch(cat_img[i],NULL,stretch_cat[i],NULL);
     }
 
@@ -542,12 +545,15 @@ usage(char* exname) {
     -h,  --help                    This help message\n\
     -f,  --fullscreen              Enable fullscreen mode (default)\n\
     -nf, --nofullscreen            Disable fullscreen mode\n\
-    -c,  --catsize                 Choose size of cat, options are full and small. Small is default\n\
+    -c,  --catsize                 Choose size of cat, options are full and \
+        small. Small is default. \"Full\" not officially supported.\n\
     -nc, --nocursor                Don't show the cursor (default)\n\
     -sc, --cursor, --showcursor    Show the cursor\n\
     -ns, --nosound                 Don't play sound\n\
-    -r,  --resolution              Make next two arguments the screen resolution to use (0 and 0 for full resolution) (800x600 default)\n\
-    -hw, -sw                       Use hardware or software SDL rendering, respectively. Hardware is default\n", exname);
+    -r,  --resolution              Make next two arguments the screen \
+        resolution to use (0 and 0 for full resolution) (800x600 default)\n\
+    -hw, -sw                       Use hardware or software SDL rendering, \
+        respectively. Hardware is default\n", exname);
     exit(0);
 }
 
@@ -559,9 +565,11 @@ xinerama_add_cats(void) {
 
     for (i = 0; i < nn; ++i)
         if(fullscreen)
-            add_cat(info[i].x_org + ((info[i].width - image_set[0]->w) / 2), info[i].y_org + ((info[i].height - image_set[0]->h) / 2));
+            add_cat(info[i].x_org + ((info[i].width - image_set[0]->w) / 2),
+                info[i].y_org + ((info[i].height - image_set[0]->h) / 2));
         else
-            add_cat((SCREEN_WIDTH - image_set[0]->w) / 2, (SCREEN_HEIGHT - image_set[0]->h) / 2);
+            add_cat((SCREEN_WIDTH - image_set[0]->w) / 2, 
+                (SCREEN_HEIGHT - image_set[0]->h) / 2);
 
     XFree(info);
 }

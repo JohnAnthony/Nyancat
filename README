@@ -2,7 +2,7 @@ Usage: nyancat [OPTIONS]
     -h,  --help                    This help message
     -f,  --fullscreen              Enable fullscreen mode (default)
     -nf, --nofullscreen            Disable fullscreen mode
-    -c,  --catsize                 Choose size of cat, options are full and small. Small is default
+    -c,  --catsize                 Choose size of cat, options are full and small. Small is default. "Full" is not officially supported.
     -nc, --nocursor                Don't show the cursor (default)
     -sc, --cursor, --showcursor    Show the cursor
     -ns, --nosound                 Don't play sound
