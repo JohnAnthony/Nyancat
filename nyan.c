@@ -19,7 +19,6 @@
 #include <X11/extensions/Xinerama.h>
 #endif /* XINERAMA */
 
-#define ANIM_FRAMES 5
 #define BUF_SZ  1024
 
 /* Type definitions */
@@ -89,15 +88,17 @@ static cat_instance*                cat_list = NULL;
 static int                          curr_frame = 0;
 static int                          sparkle_spawn_counter = 0;
 static Mix_Music*                   music;
-static SDL_Surface*                 cat_img[ANIM_FRAMES];
-static SDL_Surface*                 sparkle_img[ANIM_FRAMES];
-static SDL_Surface*                 stretch_cat[ANIM_FRAMES];
-static SDL_Surface**                image_set = sparkle_img;
+static SDL_Surface**                cat_img;
+static SDL_Surface**                sparkle_img;
+static SDL_Surface**                stretch_cat;
+static SDL_Surface**                image_set;
 static sparkle_instance*            sparkles_list = NULL;
 static Uint32                       bgcolor;
 static char*                        RESOURCE_PATH = NULL;
 static char*                        LOC_BASE_PATH = "res";
 static char*                        OS_BASE_PATH = "/usr/share/nyancat";
+static int                          ANIM_FRAMES_FG = 5;
+static int                          ANIM_FRAMES_BG = 5;
 
 /* Function definitions */
 static void
@@ -389,15 +390,19 @@ load_images(void) {
     int i;
     char buffer[1024];
 
+    cat_img = ec_malloc(sizeof(SDL_Surface*) * ANIM_FRAMES_FG);
+    sparkle_img = ec_malloc(sizeof(SDL_Surface*) * ANIM_FRAMES_BG);
+
     /* Loading logic */
-    for (i = 0; i < ANIM_FRAMES; ++i) {
+    for (i = 0; i < ANIM_FRAMES_FG; ++i) {
         snprintf(buffer, 1024, "%s/%s/fg%02d.png", LOC_BASE_PATH, RESOURCE_PATH, i);
         cat_img[i] = load_image(buffer);
         if (!cat_img[i]) {
             snprintf(buffer, 1024, "%s/%s/fg%02d.png", OS_BASE_PATH, RESOURCE_PATH, i);
             cat_img[i] = load_image(buffer);
         }
-
+    }
+    for (i = 0; i < ANIM_FRAMES_BG; ++i) {
         snprintf(buffer, 1024, "%s/%s/bg%02d.png", LOC_BASE_PATH, RESOURCE_PATH, i);
         sparkle_img[i] = load_image(buffer);
         if (!sparkle_img[i]) {
@@ -407,11 +412,11 @@ load_images(void) {
     }
 
     /* Check everything loaded properly */
-    for (int i = 0; i < ANIM_FRAMES; ++i)
+    for (int i = 0; i < ANIM_FRAMES_FG; ++i)
         if (!cat_img[i])
             errout("Error loading foreground images.");
 
-    for (int i = 0; i < ANIM_FRAMES; ++i)
+    for (int i = 0; i < ANIM_FRAMES_BG; ++i)
         if (!sparkle_img[i])
             errout("Error loading background images.");
 }
@@ -483,7 +488,7 @@ run(void) {
 
         /* Frame increment and looping */
         curr_frame++;
-        if (curr_frame >= ANIM_FRAMES)
+        if (curr_frame >= ANIM_FRAMES_FG)
             curr_frame = 0;
 
         draw_time = SDL_GetTicks() - last_draw;
@@ -519,7 +524,7 @@ stretch_images(void) {
     stretchto.h = stretchto.w * cat_img[0]->h / cat_img[0]->w;
 
     SDL_PixelFormat fmt = *(cat_img[0]->format);
-    for(int i=0; i <= ANIM_FRAMES; i++) {
+    for(int i=0; i <= ANIM_FRAMES_FG; i++) {
         stretch_cat[i] = SDL_CreateRGBSurface(SURF_TYPE, stretchto.w,
             stretchto.h,SCREEN_BPP,fmt.Rmask,fmt.Gmask,fmt.Bmask,fmt.Amask);
         SDL_SoftStretch(cat_img[i],NULL,stretch_cat[i],NULL);
@@ -543,7 +548,7 @@ update_sparkles(void) {
 
         s->frame += s->frame_mov;
 
-        if(s->frame >= ANIM_FRAMES || s->frame < 1)
+        if(s->frame + 1 >= ANIM_FRAMES_BG || s->frame < 1)
             s->frame_mov = 0 - s->frame_mov;
 
         if (s->loc.x < 0 - sparkle_img[0]->w)
