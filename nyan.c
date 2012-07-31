@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 #ifdef XINERAMA
 #include <X11/Xlib.h>
 #include <X11/extensions/Xinerama.h>
@@ -93,7 +94,7 @@ static SDL_Surface*                 stretch_cat[ANIM_FRAMES];
 static SDL_Surface**                image_set = sparkle_img;
 static sparkle_instance*            sparkles_list = NULL;
 static Uint32                       bgcolor;
-static char*                        RESOURCE_PATH = "basic";
+static char*                        RESOURCE_PATH = NULL;
 static char*                        LOC_BASE_PATH = "res";
 static char*                        OS_BASE_PATH = "/usr/share/nyancat";
 
@@ -248,6 +249,9 @@ fillsquare(SDL_Surface* surf, int x, int y, int w, int h, Uint32 col) {
 static void
 handle_args(int argc, char **argv) {
     int i;
+
+    /* This REALLY needs to be replaced with getopt */
+
     for (i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "-hw"))
             SURF_TYPE = SDL_HWSURFACE;
@@ -275,6 +279,13 @@ handle_args(int argc, char **argv) {
                     printf("Unrecognised scaling option: %s - please select either 'full' or 'small' cat size.\n", argv[i]);
             }
         }
+        else if(!strcmp(argv[i], "-r") || !strcmp(argv[i], "--resource")) {
+            if (++i < argc) {
+                if (RESOURCE_PATH)
+                    free(RESOURCE_PATH);
+                RESOURCE_PATH = strdup(argv[i]);
+            }
+        }
         else if((!strcmp(argv[i], "-r") && strcmp(argv[i], "--resolution")) && i < argc - 2) {
             int dims[2] = { atoi(argv[++i]), atoi(argv[++i]) };
             if (dims[0] >= 0 && dims[0] < 10000 && dims[1] >= 0 && dims[1] < 5000) {           // Borrowed from PixelUnsticker, changed the variable name
@@ -287,6 +298,9 @@ handle_args(int argc, char **argv) {
         else
             printf("Unrecognised option: %s\n", argv[i]);
     }
+
+    if (!RESOURCE_PATH)
+        RESOURCE_PATH = "basic";
 }
 
 static void
