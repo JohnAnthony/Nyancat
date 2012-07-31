@@ -19,6 +19,7 @@
 #endif /* XINERAMA */
 
 #define ANIM_FRAMES 5
+#define BUF_SZ  1024
 
 /* Type definitions */
 typedef struct {
@@ -93,6 +94,8 @@ static SDL_Surface**                image_set = sparkle_img;
 static sparkle_instance*            sparkles_list = NULL;
 static Uint32                       bgcolor;
 static char*                        RESOURCE_PATH = "basic";
+static char*                        LOC_BASE_PATH = "res";
+static char*                        OS_BASE_PATH = "/usr/share/nyancat";
 
 /* Function definitions */
 static void
@@ -359,22 +362,20 @@ static void
 load_images(void) {
     int i;
     char buffer[1024];
-    char *locbasepath = "res/";
-    char *altbasepath = "/usr/share/nyancat/";
 
     /* Loading logic */
     for (i = 0; i < ANIM_FRAMES; ++i) {
-        snprintf(buffer, 1024, "%s%s/fg%02d.png", locbasepath, RESOURCE_PATH, i);
+        snprintf(buffer, 1024, "%s/%s/fg%02d.png", LOC_BASE_PATH, RESOURCE_PATH, i);
         cat_img[i] = load_image(buffer);
         if (!cat_img[i]) {
-            snprintf(buffer, 1024, "%s%s/fg%02d.png", altbasepath, RESOURCE_PATH, i);
+            snprintf(buffer, 1024, "%s/%s/fg%02d.png", OS_BASE_PATH, RESOURCE_PATH, i);
             cat_img[i] = load_image(buffer);
         }
 
-        snprintf(buffer, 1024, "%s%s/bg%02d.png", locbasepath, RESOURCE_PATH, i);
+        snprintf(buffer, 1024, "%s/%s/bg%02d.png", LOC_BASE_PATH, RESOURCE_PATH, i);
         sparkle_img[i] = load_image(buffer);
         if (!sparkle_img[i]) {
-            snprintf(buffer, 1024, "%s%s/bg%02d.png", altbasepath, RESOURCE_PATH, i);
+            snprintf(buffer, 1024, "%s/%s/bg%02d.png", OS_BASE_PATH, RESOURCE_PATH, i);
             sparkle_img[i] = load_image(buffer);
         }
     }
@@ -404,9 +405,14 @@ load_image( const char* path ) {
 
 static void
 load_music(void) {
-    music = Mix_LoadMUS("res/basic/music.ogg");
-    if (!music)
-        music = Mix_LoadMUS("/usr/share/nyancat/basic/music.ogg");
+    char buffer[1024];
+
+    snprintf(buffer, 1024, "%s/%s/music.ogg", LOC_BASE_PATH, RESOURCE_PATH);
+    music = Mix_LoadMUS(buffer);
+    if (!music) {
+        snprintf(buffer, 1024, "%s/%s/music.ogg", OS_BASE_PATH, RESOURCE_PATH);
+        music = Mix_LoadMUS(buffer);
+    }
     if (!music)
         printf("Unable to load Ogg file: %s\n", Mix_GetError());
 }
