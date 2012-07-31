@@ -92,6 +92,7 @@ static SDL_Surface*                 stretch_cat[ANIM_FRAMES];
 static SDL_Surface**                image_set = sparkle_img;
 static sparkle_instance*            sparkles_list = NULL;
 static Uint32                       bgcolor;
+static char*                        RESOURCE_PATH = "basic";
 
 /* Function definitions */
 static void
@@ -357,52 +358,35 @@ init(void) {
 static void
 load_images(void) {
     int i;
-
-    /* Local cat */
-    static char *catimgpaths[] = {
-            "res/basic/fg00.png",
-            "res/basic/fg01.png",
-            "res/basic/fg02.png",
-            "res/basic/fg03.png",
-            "res/basic/fg04.png"};
-    /* Installed cat */
-    static char *altcatimgpaths[] = {
-            "/usr/share/nyancat/basic/fg00.png",
-            "/usr/share/nyancat/basic/fg01.png",
-            "/usr/share/nyancat/basic/fg02.png",
-            "/usr/share/nyancat/basic/fg03.png",
-            "/usr/share/nyancat/basic/fg04.png"};
-    /* Local sparkles */
-    static char *sparklepaths[] = {
-            "res/basic/bg0.png",
-            "res/basic/bg1.png",
-            "res/basic/bg2.png",
-            "res/basic/bg3.png",
-            "res/basic/bg4.png"};
-    /* Installed sparkles */
-    static char *altsparklepaths[] = {
-            "/usr/share/nyancat/basic/bg0.png",
-            "/usr/share/nyancat/basic/bg1.png",
-            "/usr/share/nyancat/basic/bg2.png",
-            "/usr/share/nyancat/basic/bg3.png",
-            "/usr/share/nyancat/basic/bg4.png"};
+    char buffer[1024];
+    char *locbasepath = "res/";
+    char *altbasepath = "/usr/share/nyancat/";
 
     /* Loading logic */
     for (i = 0; i < ANIM_FRAMES; ++i) {
-        /* Cat images */
-        cat_img[i] = load_image(catimgpaths[i]);
-        if (!cat_img[i])
-            cat_img[i] = load_image(altcatimgpaths[i]);
-        if (!cat_img[i])
-            errout("Error loading foreground images!");
+        snprintf(buffer, 1024, "%s%s/fg%02d.png", locbasepath, RESOURCE_PATH, 0);
+        cat_img[i] = load_image(buffer);
+        if (!cat_img[i]) {
+            snprintf(buffer, 1024, "%s%s/fg%02d.png", altbasepath, RESOURCE_PATH, 0);
+            cat_img[i] = load_image(buffer);
+        }
 
-        /* Sparkle images  */
-        sparkle_img[i] = load_image(sparklepaths[i]);
-        if (!sparkle_img[i])
-            sparkle_img[i] = load_image(altsparklepaths[i]);
-        if (!sparkle_img[i])
-            errout("Error loading background images!");
+        snprintf(buffer, 1024, "%s%s/bg%02d.png", locbasepath, RESOURCE_PATH, 0);
+        sparkle_img[i] = load_image(buffer);
+        if (!sparkle_img[i]) {
+            snprintf(buffer, 1024, "%s%s/bg%02d.png", altbasepath, RESOURCE_PATH, 0);
+            sparkle_img[i] = load_image(buffer);
+        }
     }
+
+    /* Check everything loaded properly */
+    for (int i = 0; i < ANIM_FRAMES; ++i)
+        if (!cat_img[i])
+            errout("Error loading foreground images.");
+
+    for (int i = 0; i < ANIM_FRAMES; ++i)
+        if (!sparkle_img[i])
+            errout("Error loading background images.");
 }
 
 static SDL_Surface*
