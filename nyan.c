@@ -313,7 +313,7 @@ handle_args(int argc, char **argv) {
     }
 
     if (!RESOURCE_PATH)
-        RESOURCE_PATH = "basic";
+        RESOURCE_PATH = "default";
 }
 
 static void
@@ -600,8 +600,8 @@ usage(char* exname) {
                                    resolution to use (0 and 0 for full \n\
                                    resolution) (800x600 default)\n\
     -d, --data-set                 Use an alternate data set. Packaged with\n\
-                                   this program by default are \"basic\"\n\
-                                   (the default) and \"freedom\" sets.\n\
+                                   this program by default are \"default\"\n\
+                                   and \"freedom\" sets.\n\
     -hw, -sw                       Use hardware or software SDL rendering, \n\
                                    respectively. Hardware is default\n", exname);
     exit(0);
