@@ -103,7 +103,7 @@ add_sparkle(void) {
 
     new->loc.x = screen->w + 80;
     new->loc.y = (rand() % (screen->h + sparkle_img[0]->h)) - sparkle_img[0]->h;
-    new->frame = rand() % 4;
+    new->frame = 0;
     new->frame_mov = 1;
     new->speed = 10 + (rand() % 30);
     new->layer = rand() % 2;
@@ -469,7 +469,7 @@ run(void) {
 
         /* Frame increment and looping */
         curr_frame++;
-        if (curr_frame > 4)
+        if (curr_frame >= ANIM_FRAMES)
             curr_frame = 0;
 
         draw_time = SDL_GetTicks() - last_draw;
@@ -505,7 +505,7 @@ stretch_images(void) {
     stretchto.h = stretchto.w * cat_img[0]->h / cat_img[0]->w;
 
     SDL_PixelFormat fmt = *(cat_img[0]->format);
-    for(int i=0; i<=4; i++) {
+    for(int i=0; i <= ANIM_FRAMES; i++) {
         stretch_cat[i] = SDL_CreateRGBSurface(SURF_TYPE, stretchto.w,
             stretchto.h,SCREEN_BPP,fmt.Rmask,fmt.Gmask,fmt.Bmask,fmt.Amask);
         SDL_SoftStretch(cat_img[i],NULL,stretch_cat[i],NULL);
@@ -529,7 +529,7 @@ update_sparkles(void) {
 
         s->frame += s->frame_mov;
 
-        if(s->frame > 3 || s->frame < 1)
+        if(s->frame >= ANIM_FRAMES || s->frame < 1)
             s->frame_mov = 0 - s->frame_mov;
 
         if (s->loc.x < 0 - sparkle_img[0]->w)
