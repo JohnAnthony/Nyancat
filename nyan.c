@@ -364,17 +364,17 @@ load_images(void) {
 
     /* Loading logic */
     for (i = 0; i < ANIM_FRAMES; ++i) {
-        snprintf(buffer, 1024, "%s%s/fg%02d.png", locbasepath, RESOURCE_PATH, 0);
+        snprintf(buffer, 1024, "%s%s/fg%02d.png", locbasepath, RESOURCE_PATH, i);
         cat_img[i] = load_image(buffer);
         if (!cat_img[i]) {
-            snprintf(buffer, 1024, "%s%s/fg%02d.png", altbasepath, RESOURCE_PATH, 0);
+            snprintf(buffer, 1024, "%s%s/fg%02d.png", altbasepath, RESOURCE_PATH, i);
             cat_img[i] = load_image(buffer);
         }
 
-        snprintf(buffer, 1024, "%s%s/bg%02d.png", locbasepath, RESOURCE_PATH, 0);
+        snprintf(buffer, 1024, "%s%s/bg%02d.png", locbasepath, RESOURCE_PATH, i);
         sparkle_img[i] = load_image(buffer);
         if (!sparkle_img[i]) {
-            snprintf(buffer, 1024, "%s%s/bg%02d.png", altbasepath, RESOURCE_PATH, 0);
+            snprintf(buffer, 1024, "%s%s/bg%02d.png", altbasepath, RESOURCE_PATH, i);
             sparkle_img[i] = load_image(buffer);
         }
     }
