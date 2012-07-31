@@ -360,50 +360,48 @@ load_images(void) {
 
     /* Local cat */
     static char *catimgpaths[] = {
-            "res/frame00.png",
-            "res/frame01.png",
-            "res/frame02.png",
-            "res/frame03.png",
-            "res/frame04.png"};
+            "res/basic/fg00.png",
+            "res/basic/fg01.png",
+            "res/basic/fg02.png",
+            "res/basic/fg03.png",
+            "res/basic/fg04.png"};
     /* Installed cat */
     static char *altcatimgpaths[] = {
-            "/usr/share/nyancat/frame00.png",
-            "/usr/share/nyancat/frame01.png",
-            "/usr/share/nyancat/frame02.png",
-            "/usr/share/nyancat/frame03.png",
-            "/usr/share/nyancat/frame04.png"};
+            "/usr/share/nyancat/basic/fg00.png",
+            "/usr/share/nyancat/basic/fg01.png",
+            "/usr/share/nyancat/basic/fg02.png",
+            "/usr/share/nyancat/basic/fg03.png",
+            "/usr/share/nyancat/basic/fg04.png"};
     /* Local sparkles */
     static char *sparklepaths[] = {
-            "res/sparkle0.png",
-            "res/sparkle1.png",
-            "res/sparkle2.png",
-            "res/sparkle3.png",
-            "res/sparkle4.png"};
+            "res/basic/bg0.png",
+            "res/basic/bg1.png",
+            "res/basic/bg2.png",
+            "res/basic/bg3.png",
+            "res/basic/bg4.png"};
     /* Installed sparkles */
     static char *altsparklepaths[] = {
-            "/usr/share/nyancat/sparkle0.png",
-            "/usr/share/nyancat/sparkle1.png",
-            "/usr/share/nyancat/sparkle2.png",
-            "/usr/share/nyancat/sparkle3.png",
-            "/usr/share/nyancat/sparkle4.png"};
+            "/usr/share/nyancat/basic/bg0.png",
+            "/usr/share/nyancat/basic/bg1.png",
+            "/usr/share/nyancat/basic/bg2.png",
+            "/usr/share/nyancat/basic/bg3.png",
+            "/usr/share/nyancat/basic/bg4.png"};
 
     /* Loading logic */
     for (i = 0; i < ANIM_FRAMES; ++i) {
-
         /* Cat images */
         cat_img[i] = load_image(catimgpaths[i]);
         if (!cat_img[i])
             cat_img[i] = load_image(altcatimgpaths[i]);
         if (!cat_img[i])
-            errout("Error loading cat images!");
+            errout("Error loading foreground images!");
 
         /* Sparkle images  */
         sparkle_img[i] = load_image(sparklepaths[i]);
         if (!sparkle_img[i])
             sparkle_img[i] = load_image(altsparklepaths[i]);
         if (!sparkle_img[i])
-            errout("Error loading sparkle images!");
-
+            errout("Error loading background images!");
     }
 }
 
@@ -422,9 +420,9 @@ load_image( const char* path ) {
 
 static void
 load_music(void) {
-    music = Mix_LoadMUS("res/nyan.ogg");
+    music = Mix_LoadMUS("res/basic/music.ogg");
     if (!music)
-        music = Mix_LoadMUS("/usr/share/nyancat/nyan.ogg");
+        music = Mix_LoadMUS("/usr/share/nyancat/basic/music.ogg");
     if (!music)
         printf("Unable to load Ogg file: %s\n", Mix_GetError());
 }

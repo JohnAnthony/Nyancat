@@ -14,7 +14,7 @@ nyancat:  nyan.c
 install:
 	cp nyancat ${BIN}
 	mkdir --parents ${RES}
-	cp -v res/* ${RES}
+	cp -rv res/* ${RES}
 
 clean:
 	rm nyancat
