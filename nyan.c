@@ -292,7 +292,7 @@ handle_args(int argc, char **argv) {
                     printf("Unrecognised scaling option: %s - please select either 'full' or 'small' cat size.\n", argv[i]);
             }
         }
-        else if(!strcmp(argv[i], "-r") || !strcmp(argv[i], "--resource")) {
+        else if(!strcmp(argv[i], "-d") || !strcmp(argv[i], "--data-set")) {
             if (++i < argc) {
                 if (RESOURCE_PATH)
                     free(RESOURCE_PATH);
@@ -595,10 +595,13 @@ usage(char* exname) {
     -nc, --nocursor                Don't show the cursor (default)\n\
     -sc, --cursor, --showcursor    Show the cursor\n\
     -ns, --nosound                 Don't play sound\n\
-    -v, --volume                   Set Volume, if enabled, from 0 - 128\n\
+    -v,  --volume                  Set Volume, if enabled, from 0 - 128\n\
     -r,  --resolution              Make next two arguments the screen \n\
                                    resolution to use (0 and 0 for full \n\
                                    resolution) (800x600 default)\n\
+    -d, --data-set                 Use an alternate data set. Packaged with\n\
+                                   this program by default are \"basic\"\n\
+                                   (the default) and \"freedom\" sets.\n\
     -hw, -sw                       Use hardware or software SDL rendering, \n\
                                    respectively. Hardware is default\n", exname);
     exit(0);
