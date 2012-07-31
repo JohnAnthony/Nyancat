@@ -56,6 +56,7 @@ static void handle_input(void);
 static void init(void);
 static void load_images(void);
 static SDL_Surface* load_image(const char* path);
+static void load_resource_data(void);
 static void load_music(void);
 static void putpix(SDL_Surface* surf, int x, int y, Uint32 col);
 static void remove_sparkle(sparkle_instance* s);
@@ -97,8 +98,8 @@ static Uint32                       bgcolor;
 static char*                        RESOURCE_PATH = NULL;
 static char*                        LOC_BASE_PATH = "res";
 static char*                        OS_BASE_PATH = "/usr/share/nyancat";
-static int                          ANIM_FRAMES_FG = 5;
-static int                          ANIM_FRAMES_BG = 5;
+static int                          ANIM_FRAMES_FG = 0;
+static int                          ANIM_FRAMES_BG = 0;
 
 /* Function definitions */
 static void
@@ -342,6 +343,7 @@ init(void) {
     if(!cursor)
         SDL_ShowCursor(0);
 
+    load_resource_data();
     load_images();
     bgcolor = SDL_MapRGB(screen->format, 0x00, 0x33, 0x66);
     fillsquare(screen, 0, 0, screen->w, screen->h, bgcolor);
@@ -388,25 +390,25 @@ init(void) {
 static void
 load_images(void) {
     int i;
-    char buffer[1024];
+    char buffer[BUF_SZ];
 
     cat_img = ec_malloc(sizeof(SDL_Surface*) * ANIM_FRAMES_FG);
     sparkle_img = ec_malloc(sizeof(SDL_Surface*) * ANIM_FRAMES_BG);
 
     /* Loading logic */
     for (i = 0; i < ANIM_FRAMES_FG; ++i) {
-        snprintf(buffer, 1024, "%s/%s/fg%02d.png", LOC_BASE_PATH, RESOURCE_PATH, i);
+        snprintf(buffer, BUF_SZ, "%s/%s/fg%02d.png", LOC_BASE_PATH, RESOURCE_PATH, i);
         cat_img[i] = load_image(buffer);
         if (!cat_img[i]) {
-            snprintf(buffer, 1024, "%s/%s/fg%02d.png", OS_BASE_PATH, RESOURCE_PATH, i);
+            snprintf(buffer, BUF_SZ, "%s/%s/fg%02d.png", OS_BASE_PATH, RESOURCE_PATH, i);
             cat_img[i] = load_image(buffer);
         }
     }
     for (i = 0; i < ANIM_FRAMES_BG; ++i) {
-        snprintf(buffer, 1024, "%s/%s/bg%02d.png", LOC_BASE_PATH, RESOURCE_PATH, i);
+        snprintf(buffer, BUF_SZ, "%s/%s/bg%02d.png", LOC_BASE_PATH, RESOURCE_PATH, i);
         sparkle_img[i] = load_image(buffer);
         if (!sparkle_img[i]) {
-            snprintf(buffer, 1024, "%s/%s/bg%02d.png", OS_BASE_PATH, RESOURCE_PATH, i);
+            snprintf(buffer, BUF_SZ, "%s/%s/bg%02d.png", OS_BASE_PATH, RESOURCE_PATH, i);
             sparkle_img[i] = load_image(buffer);
         }
     }
@@ -436,16 +438,39 @@ load_image( const char* path ) {
 
 static void
 load_music(void) {
-    char buffer[1024];
+    char buffer[BUF_SZ];
 
-    snprintf(buffer, 1024, "%s/%s/music.ogg", LOC_BASE_PATH, RESOURCE_PATH);
+    snprintf(buffer, BUF_SZ, "%s/%s/music.ogg", LOC_BASE_PATH, RESOURCE_PATH);
     music = Mix_LoadMUS(buffer);
     if (!music) {
-        snprintf(buffer, 1024, "%s/%s/music.ogg", OS_BASE_PATH, RESOURCE_PATH);
+        snprintf(buffer, BUF_SZ, "%s/%s/music.ogg", OS_BASE_PATH, RESOURCE_PATH);
         music = Mix_LoadMUS(buffer);
     }
     if (!music)
         printf("Unable to load Ogg file: %s\n", Mix_GetError());
+}
+
+static void
+load_resource_data(void) {
+    FILE *f;
+    char buffer[BUF_SZ];
+
+    snprintf(buffer, BUF_SZ, "%s/%s/data", LOC_BASE_PATH, RESOURCE_PATH);
+    f = fopen(buffer, "r");
+    if (!f) {
+        snprintf(buffer, BUF_SZ, "%s/%s/data", OS_BASE_PATH, RESOURCE_PATH);
+        f = fopen(buffer, "r");
+    }
+    if (!f)
+        errout("Error opening resource data file");
+
+    fgets(buffer, BUF_SZ, f);
+    ANIM_FRAMES_FG = atoi(buffer);
+    fgets(buffer, BUF_SZ, f);
+    ANIM_FRAMES_BG = atoi(buffer);
+
+    if (!ANIM_FRAMES_FG || !ANIM_FRAMES_BG)
+        errout("Error reading resource data file.");
 }
 
 static void
