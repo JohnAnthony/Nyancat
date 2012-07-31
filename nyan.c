@@ -78,6 +78,7 @@ static SDL_Event                    event;
 static int                          running = 1;
 static int                          SURF_TYPE = SDL_HWSURFACE;
 static int                          sound = 1;
+static int                          sound_volume = 128;
 static int                          fullscreen = 1;
 static int                          catsize = 0;
 static int                          cursor = 0;
@@ -267,6 +268,16 @@ handle_args(int argc, char **argv) {
             cursor = 1;
         else if(!strcmp(argv[i], "-ns") || !strcmp(argv[i], "--nosound"))
             sound = 0;
+        else if((!strcmp(argv[i], "-v") || !strcmp(argv[i], "--volume")) && i < argc - 1) {
+            int vol = atoi(argv[++i]);
+            if(vol >= 0 && vol <= 128){
+                sound_volume = vol;
+            }
+            else {
+                puts("Arguments for Volume are not valid. Disabling sound.");
+                sound = 0;
+            }
+        }
         else if(!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help")) 
             usage(argv[0]);
         else if(!strcmp(argv[i], "-c") || !strcmp(argv[i], "--catsize")) {
@@ -338,6 +349,7 @@ init(void) {
         Mix_OpenAudio( 44100, AUDIO_S16, 2, 256 );
         load_music();
         Mix_PlayMusic(music, 0);
+        Mix_VolumeMusic(sound_volume);
     }
 
     /* Choose our image set */
@@ -553,6 +565,7 @@ usage(char* exname) {
     -nc, --nocursor                Don't show the cursor (default)\n\
     -sc, --cursor, --showcursor    Show the cursor\n\
     -ns, --nosound                 Don't play sound\n\
+    -v, --volume                   Set Volume, if enabled, from 0 - 128\n\
     -r,  --resolution              Make next two arguments the screen \n\
                                    resolution to use (0 and 0 for full \n\
                                    resolution) (800x600 default)\n\
