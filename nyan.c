@@ -545,15 +545,17 @@ usage(char* exname) {
     -h,  --help                    This help message\n\
     -f,  --fullscreen              Enable fullscreen mode (default)\n\
     -nf, --nofullscreen            Disable fullscreen mode\n\
-    -c,  --catsize                 Choose size of cat, options are full and \
-        small. Small is default. \"Full\" not officially supported.\n\
+    -c,  --catsize                 Choose size of cat, options are full and \n\
+                                   small. Small is default. \"Full\" not\n\
+                                   officially supported.\n\
     -nc, --nocursor                Don't show the cursor (default)\n\
     -sc, --cursor, --showcursor    Show the cursor\n\
     -ns, --nosound                 Don't play sound\n\
-    -r,  --resolution              Make next two arguments the screen \
-        resolution to use (0 and 0 for full resolution) (800x600 default)\n\
-    -hw, -sw                       Use hardware or software SDL rendering, \
-        respectively. Hardware is default\n", exname);
+    -r,  --resolution              Make next two arguments the screen \n\
+                                   resolution to use (0 and 0 for full \n\
+                                   resolution) (800x600 default)\n\
+    -hw, -sw                       Use hardware or software SDL rendering, \n\
+                                   respectively. Hardware is default\n", exname);
     exit(0);
 }
 
