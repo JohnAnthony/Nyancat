@@ -625,8 +625,7 @@ xinerama_add_cats(void) {
 }
 #endif /* XINERAMA */
 
-int main( int argc, char **argv )
-{
+int main( int argc, char **argv ) {
     handle_args(argc, argv);
     init();
     run();

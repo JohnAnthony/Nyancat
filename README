@@ -1,3 +1,5 @@
+Now with full MooGNU support!
+
 Usage: nyancat [OPTIONS]
     -h,  --help                    This help message
     -f,  --fullscreen              Enable fullscreen mode (default)
