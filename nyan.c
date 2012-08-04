@@ -60,6 +60,7 @@ static void load_resource_data(void);
 static void load_music(void);
 static void putpix(SDL_Surface* surf, int x, int y, Uint32 col);
 static void remove_sparkle(sparkle_instance* s);
+static void restart_music(void);
 static void run(void);
 static void stretch_images(void);
 static void update_sparkles(void);
@@ -353,6 +354,7 @@ init(void) {
         load_music();
         Mix_PlayMusic(music, 0);
         Mix_VolumeMusic(sound_volume);
+        Mix_HookMusicFinished(restart_music);
     }
 
     /* Choose our image set */
@@ -494,6 +496,11 @@ remove_sparkle(sparkle_instance* s) {
 
     s2->next = s2->next->next;
     free(s);
+}
+
+static void
+restart_music(void) {
+    Mix_PlayMusic(music, 0);
 }
 
 static void
