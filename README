@@ -15,7 +15,7 @@ Usage: nyancat [OPTIONS]
                                    to use (0 and 0 for full resolution)
                                    (800x600 default)
     -d, --data-set                 Use an alternate data set. Packaged with
-                                   this program by default are "basic" (the
-                                   default) and "freedom" sets.
+                                   this program by default are "default" and 
+                                   "freedom" sets.
     -hw, -sw                       Use hardware or software SDL rendering,
                                    respectively. Hardware is default
