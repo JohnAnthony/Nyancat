@@ -354,7 +354,6 @@ init(void) {
         load_music();
         Mix_PlayMusic(music, 0);
         Mix_VolumeMusic(sound_volume);
-        Mix_HookMusicFinished(restart_music);
     }
 
     /* Choose our image set */
@@ -450,6 +449,8 @@ load_music(void) {
     }
     if (!music)
         printf("Unable to load Ogg file: %s\n", Mix_GetError());
+    else
+        Mix_HookMusicFinished(restart_music);
 }
 
 static void
