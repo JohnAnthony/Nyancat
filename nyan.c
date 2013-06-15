@@ -447,10 +447,8 @@ load_resource_data(void) {
     if (!f)
         errout("Error opening resource data file");
 
-    fgets(buffer, BUF_SZ, f);
-    ANIM_FRAMES_FG = atoi(buffer);
-    fgets(buffer, BUF_SZ, f);
-    ANIM_FRAMES_BG = atoi(buffer);
+    ANIM_FRAMES_FG = atoi(fgets(buffer, BUF_SZ, f));
+    ANIM_FRAMES_BG = atoi(fgets(buffer, BUF_SZ, f));
 
     if (!ANIM_FRAMES_FG || !ANIM_FRAMES_BG)
         errout("Error reading resource data file.");
@@ -583,13 +581,16 @@ xinerama_add_cats(void) {
     int i, nn;
     XineramaScreenInfo* info = XineramaQueryScreens(dpy, &nn);
 
-    for (i = 0; i < nn; ++i)
-        if(fullscreen)
+    for (i = 0; i < nn; ++i) {
+        if(fullscreen) {
             add_cat(info[i].x_org + ((info[i].width - image_set[0]->w) / 2),
                 info[i].y_org + ((info[i].height - image_set[0]->h) / 2));
-        else
+        }
+        else {
             add_cat((SCREEN_WIDTH - image_set[0]->w) / 2, 
                 (SCREEN_HEIGHT - image_set[0]->h) / 2);
+        }
+    }
 
     XFree(info);
 }
