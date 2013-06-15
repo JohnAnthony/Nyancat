@@ -520,7 +520,7 @@ stretch_images(void) {
     stretchto.h = stretchto.w * cat_img[0]->h / cat_img[0]->w;
 
     SDL_PixelFormat fmt = *(cat_img[0]->format);
-    for(int i=0; i <= ANIM_FRAMES_FG; i++) {
+    for (int i=0; i <= ANIM_FRAMES_FG; i++) {
         stretch_cat[i] = SDL_CreateRGBSurface(SURF_TYPE, stretchto.w,
             stretchto.h,SCREEN_BPP,fmt.Rmask,fmt.Gmask,fmt.Bmask,fmt.Amask);
         SDL_SoftStretch(cat_img[i],NULL,stretch_cat[i],NULL);
