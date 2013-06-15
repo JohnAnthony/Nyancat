@@ -18,6 +18,7 @@
 #include <X11/Xlib.h>
 #include <X11/extensions/Xinerama.h>
 #endif /* XINERAMA */
+#include "list.h" /* Linked list implementation */
 
 #define BUF_SZ  1024
 
@@ -29,7 +30,7 @@ typedef struct {
 typedef struct cat_instance cat_instance;
 struct cat_instance {
     coords loc;
-    cat_instance *next;
+    struct list_head list;
 };
 
 typedef struct sparkle_instance sparkle_instance;
@@ -38,7 +39,7 @@ struct sparkle_instance {
     int frame_mov;
     unsigned int layer;
     coords loc;
-    sparkle_instance *next;
+    struct list_head list;
 };
 
 /* Predecs */
@@ -59,7 +60,6 @@ static SDL_Surface* load_image(const char* path);
 static void load_resource_data(void);
 static void load_music(void);
 static void putpix(SDL_Surface* surf, int x, int y, Uint32 col);
-static void remove_sparkle(sparkle_instance* s);
 static void restart_music(void);
 static void run(void);
 static void stretch_images(void);
@@ -86,7 +86,6 @@ static int                          cursor = 0;
 #ifdef XINERAMA
 static Display*                     dpy;
 #endif /* XINERAMA */
-static cat_instance*                cat_list = NULL;
 static int                          curr_frame = 0;
 static int                          sparkle_spawn_counter = 0;
 static Mix_Music*                   music;
@@ -94,62 +93,38 @@ static SDL_Surface**                cat_img;
 static SDL_Surface**                sparkle_img;
 static SDL_Surface**                stretch_cat;
 static SDL_Surface**                image_set;
-static sparkle_instance*            sparkles_list = NULL;
 static Uint32                       bgcolor;
 static char*                        RESOURCE_PATH = NULL;
 static char*                        LOC_BASE_PATH = "res";
 static char*                        OS_BASE_PATH = "/usr/share/nyancat";
 static int                          ANIM_FRAMES_FG = 0;
 static int                          ANIM_FRAMES_BG = 0;
+static LIST_HEAD(sparkle_list);
+static LIST_HEAD(cat_list);
 
 /* Function definitions */
 static void
 add_sparkle(void) {
-    sparkle_instance* s = sparkles_list;
     sparkle_instance* new;
 
     new = ec_malloc(sizeof(sparkle_instance));
-
     new->loc.x = screen->w + 80;
     new->loc.y = (rand() % (screen->h + sparkle_img[0]->h)) - sparkle_img[0]->h;
     new->frame = 0;
     new->frame_mov = 1;
     new->speed = 10 + (rand() % 30);
     new->layer = rand() % 2;
-    new->next = NULL;
-
-    if (!sparkles_list) {
-        sparkles_list = new;
-        return;
-    }
-
-    /* Find end of list */
-    while (s->next)
-        s = s->next;
-    s->next = new;
+    list_add(&new->list, &sparkle_list);
 }
 
 static void
 add_cat(unsigned int x, unsigned int y) {
-    cat_instance* c = cat_list;
     cat_instance* new;
 
     new = ec_malloc(sizeof(cat_instance));
-
     new->loc.x = x;
     new->loc.y = y;
-    new->next = NULL;
-
-    if (!cat_list) {
-        cat_list = new;
-        return;
-    }
-
-    /* Find end of list */
-    while (c->next)
-        c = c->next;
-
-    c->next = new;
+    list_add(&new->list, &cat_list);
 }
 
 static void
@@ -162,49 +137,54 @@ cleanup(void) {
 
 static void
 clear_screen(void) {
-    sparkle_instance *s = sparkles_list;
-    cat_instance *c = cat_list;
+    sparkle_instance *s;
+    cat_instance *c;
 
-    while (c) {
+    list_for_each_entry(c, &cat_list, list) {
         /* This is bad. These magic numbers are to make up for uneven image sizes */
-        fillsquare(screen, c->loc.x, c->loc.y - (curr_frame < 2 ? 0 : 5),
-          image_set[curr_frame]->w + 6, image_set[curr_frame]->h + 5, bgcolor);
-        c = c->next;
+        fillsquare(screen,
+                   c->loc.x,
+                   c->loc.y - (curr_frame < 2 ? 0 : 5),
+                   image_set[curr_frame]->w + 6,
+                   image_set[curr_frame]->h + 5,
+                   bgcolor);
     }
 
-    while (s) {
-        fillsquare(screen, s->loc.x, s->loc.y, sparkle_img[s->frame]->w, sparkle_img[s->frame]->h, bgcolor);
-        s = s->next;
+    list_for_each_entry(s, &sparkle_list, list) {
+        fillsquare(screen,
+                   s->loc.x,
+                   s->loc.y,
+                   sparkle_img[s->frame]->w,
+                   sparkle_img[s->frame]->h,
+                   bgcolor);
     }
 
 }
 
 static void
 draw_cats(unsigned int frame) {
-    cat_instance* c = cat_list;
+    cat_instance* c;
     SDL_Rect pos;
 
-    while (c) {
+    list_for_each_entry(c, &cat_list, list) {
         pos.x = c->loc.x;
         pos.y = c->loc.y;
 
         if(frame < 2)
             pos.y -= 5;
         SDL_BlitSurface( image_set[frame], NULL, screen, &pos );
-        c = c->next;
     }
 }
 
 static void
 draw_sparkles() {
-    sparkle_instance* s = sparkles_list;
+    sparkle_instance* s;
     SDL_Rect pos;
 
-    while (s) {
+    list_for_each_entry(s, &sparkle_list, list) {
         pos.x = s->loc.x;
         pos.y = s->loc.y;
         SDL_BlitSurface( sparkle_img[s->frame], NULL, screen, &pos );
-        s = s->next;
     }
 }
 
@@ -483,23 +463,6 @@ putpix(SDL_Surface* surf, int x, int y, Uint32 col) {
 }
 
 static void
-remove_sparkle(sparkle_instance* s) {
-    sparkle_instance* s2 = sparkles_list;
-
-    if (s2 == s) {
-        sparkles_list = s->next;
-        free(s);
-        return;
-    }
-
-    while (s2->next != s)
-        s2 = s2->next;
-
-    s2->next = s2->next->next;
-    free(s);
-}
-
-static void
 restart_music(void) {
     Mix_PlayMusic(music, 0);
 }
@@ -567,7 +530,8 @@ stretch_images(void) {
 
 static void
 update_sparkles(void) {
-    sparkle_instance* next, *s = sparkles_list;
+    sparkle_instance *s;
+    sparkle_instance *tmp;
 
     sparkle_spawn_counter += rand() % screen->h;
     while(sparkle_spawn_counter >= 1000) {
@@ -575,19 +539,17 @@ update_sparkles(void) {
         sparkle_spawn_counter -= 1000;
     }
 
-    while(s) {
+    list_for_each_entry_safe(s, tmp, &sparkle_list, list) {
         s->loc.x -= s->speed;
-        next = s->next;
-
         s->frame += s->frame_mov;
 
         if(s->frame + 1 >= ANIM_FRAMES_BG || s->frame < 1)
             s->frame_mov = 0 - s->frame_mov;
 
-        if (s->loc.x < 0 - sparkle_img[0]->w)
-            remove_sparkle(s);
-
-        s = next;
+        if (s->loc.x < 0 - sparkle_img[0]->w) {
+            list_del(&s->list);
+            free(s);
+        }
     }
 }
 

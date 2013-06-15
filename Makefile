@@ -1,7 +1,7 @@
 RES = /usr/share/nyancat
 BIN = /usr/bin/nyancat
 LIBS = -lSDL -lSDL_image -lSDL_mixer -lX11
-FLAGS = -pedantic -Wall -O2 -std=c99 -D_GNU_SOURCE
+FLAGS = -pedantic -Wall -O2 -std=gnu99 -D_GNU_SOURCE
 INCS = -I. -I/usr/include ${XINERAMAINC}
 
 XINERAMAINC = -I/usr/X11R6/include
