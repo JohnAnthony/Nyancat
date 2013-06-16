@@ -21,7 +21,8 @@
 #include <stdbool.h>
 
 struct list_head {
-    struct list_head *next, *prev;
+    struct list_head *next;
+    struct list_head *prev;
 };
 
 #define LIST_HEAD_INIT(name) { &(name), &(name) }
@@ -39,10 +40,9 @@ struct list_head {
  * This is only for internal list manipulation where we know
  * the prev/next entries already!
  */
-static inline void __list_add(struct list_head *new,
-                  struct list_head *prev,
-                  struct list_head *next)
-{
+static inline void
+__list_add(struct list_head *new, struct list_head *prev,
+           struct list_head *next) {
     next->prev = new;
     new->next = next;
     new->prev = prev;
