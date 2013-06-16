@@ -215,6 +215,16 @@ list_splice_init(struct list_head *list, struct list_head *head) {
         pos = n, n = pos->next)
 
 /**
+ * list_for_each_safe_reverse - iterate list backwards safely
+ * @pos: the &struct list_head to use as a loop counter.
+ * @n: another &struct list_head to use as temporary storage
+ * @head: the head for your list.
+ */
+#define list_for_each_safe_reverse(pos, n, head) \
+    for (pos = (head)->prev, n = pos->prev; pos != (head); \
+        pos = n, n = pos->prev)
+
+/**
  * list_for_each_entry - iterate over list of given type
  * @pos: the type * to use as a loop counter.
  * @head: the head for your list.
@@ -224,6 +234,17 @@ list_splice_init(struct list_head *list, struct list_head *head) {
     for (pos = list_entry((head)->next, typeof(*pos), member); \
          &pos->member != (head); \
          pos = list_entry(pos->member.next, typeof(*pos), member))
+
+/**
+ * list_for_each_entry_reverse - iterate list of given type backwards
+ * @pos: the type * to use as a loop counter.
+ * @head: the head for your list.
+ * @member: the name of the list_struct within the struct.
+ */
+#define list_for_each_entry_reverse(pos, head, member) \
+    for (pos = list_entry((head)->prev, typeof(*pos), member); \
+         &pos->member != (head); \
+         pos = list_entry(pos->member.prev, typeof(*pos), member))
 
 /**
  * list_for_each_entry_safe - iterate list entries safe against removal
