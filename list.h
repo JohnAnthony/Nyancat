@@ -18,6 +18,8 @@
  * using the generic single-entry routines.
  */
 
+#include <stdbool.h>
+
 struct list_head {
     struct list_head *next, *prev;
 };
@@ -135,7 +137,7 @@ list_move_tail(struct list_head *list, struct list_head *head) {
  * list_empty - tests whether a list is empty
  * @head: the list to test.
  */
-static inline int
+static inline bool
 list_empty(struct list_head *head) {
     return head->next == head;
 }
@@ -271,5 +273,20 @@ list_splice_init(struct list_head *list, struct list_head *head) {
          n = list_entry(pos->member.prev, typeof(*pos), member); \
          &pos->member != (head); \
          pos = n, n = list_entry(n->member.prev, typeof(*n), member))
+
+/**
+ * list_len - count number of elements in the given list
+ * @head: the head for your list
+ * Note: This is a O(1) time operation and should be used sparingly
+ */
+static inline size_t
+list_len(struct list_head *head) {
+    struct list_head *iter;
+    size_t count = 0;
+
+    list_for_each(iter, head)
+        ++count;
+    return count;
+}
 
 #endif
