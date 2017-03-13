@@ -1,8 +1,8 @@
 /* ============================================================================================ */
-/* This software is created by LAMMJohnson and comes with no warranty of any kind.              */
+/* This software is created by John Anthony and comes with no warranty of any kind.             */
 /*                                                                                              */
 /* If you like this software and would like to contribute to its continued improvement          */
-/* then please feel free to submit bug reports here: www.github.com/LAMMJohnson                 */
+/* then please feel free to submit bug reports here: www.github.com/JohnAnthony                 */
 /*                                                                                              */
 /* This program is licensed under the GPLv3 and in support of Free and Open Source              */
 /* Software in general. The full license can be found at http://www.gnu.org/licenses/gpl.html   */
